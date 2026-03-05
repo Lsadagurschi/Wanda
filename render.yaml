@@ -3,7 +3,7 @@ services:
     name: wanda-app
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 120 src.main:app
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 120 wsgi:app
     envVars:
       - key: SECRET_KEY
         generateValue: true
