@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: wanda-app
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 120 src.main:app
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: 3306
+      - key: DB_NAME
+        value: wanda
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: FLASK_DEBUG
+        value: false

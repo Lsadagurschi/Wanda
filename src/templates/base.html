@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Wanda — Consultas Inteligentes{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            wanda: {
+              50:  '#f3f0ff',
+              100: '#e9e3ff',
+              200: '#d5caff',
+              300: '#b8a4ff',
+              400: '#9472ff',
+              500: '#6C3CE1',
+              600: '#5a2fd4',
+              700: '#4a22b8',
+              800: '#3d1d96',
+              900: '#321a7a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .gradient-wanda { background: linear-gradient(135deg, #6C3CE1 0%, #9472ff 50%, #b8a4ff 100%); }
+    .gradient-text { background: linear-gradient(135deg, #6C3CE1, #9472ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .glass { background: rgba(255,255,255,0.08); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.15); }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(108,60,225,0.15); }
+    .sql-block { background: #1e1e2e; color: #cdd6f4; border-left: 4px solid #6C3CE1; }
+    ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #f1f5f9; } ::-webkit-scrollbar-thumb { background: #6C3CE1; border-radius: 3px; }
+    .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .pulse-dot { animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div id="flash-messages" class="fixed top-4 right-4 z-50 space-y-2">
+      {% for category, message in messages %}
+        <div class="flash-msg flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium
+          {% if category == 'error' %}bg-red-500 text-white
+          {% elif category == 'success' %}bg-green-500 text-white
+          {% elif category == 'warning' %}bg-yellow-500 text-white
+          {% else %}bg-wanda-500 text-white{% endif %}">
+          <span>{{ message }}</span>
+          <button onclick="this.parentElement.remove()" class="ml-2 opacity-70 hover:opacity-100">✕</button>
+        </div>
+      {% endfor %}
+    </div>
+    <script>setTimeout(() => { document.querySelectorAll('.flash-msg').forEach(el => el.remove()); }, 5000);</script>
+  {% endif %}
+{% endwith %}
+
+{% block body %}{% endblock %}
+
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

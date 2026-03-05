@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Entrar — Wanda{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex" style="background: linear-gradient(135deg, #f3f0ff 0%, #e9e3ff 100%);">
+  <!-- Left Panel -->
+  <div class="hidden lg:flex lg:w-1/2 gradient-wanda items-center justify-center p-12">
+    <div class="text-white max-w-md">
+      <div class="flex items-center gap-3 mb-12">
+        <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
+          <span class="text-white font-bold text-2xl">W</span>
+        </div>
+        <span class="text-3xl font-bold">Wanda</span>
+      </div>
+      <h2 class="text-4xl font-bold mb-4 leading-tight">Seus dados, suas perguntas, suas respostas.</h2>
+      <p class="text-wanda-100 text-lg mb-8">Acesse o painel e comece a extrair insights do seu banco de dados com inteligência artificial.</p>
+      <div class="space-y-4">
+        {% for feat in ['Consultas em linguagem natural', 'Dashboards interativos', 'Exportação CSV e PDF', 'Histórico completo'] %}
+        <div class="flex items-center gap-3">
+          <div class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-xs">✓</div>
+          <span class="text-wanda-100">{{ feat }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="w-full lg:w-1/2 flex items-center justify-center p-8">
+    <div class="w-full max-w-md">
+      <div class="lg:hidden flex items-center gap-2 mb-8">
+        <div class="w-9 h-9 gradient-wanda rounded-xl flex items-center justify-center">
+          <span class="text-white font-bold text-lg">W</span>
+        </div>
+        <span class="text-xl font-bold gradient-text">Wanda</span>
+      </div>
+
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Bem-vindo de volta</h1>
+      <p class="text-gray-500 mb-8">Entre na sua conta para continuar</p>
+
+      <form id="login-form" class="space-y-5">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">E-mail</label>
+          <input type="email" name="email" required placeholder="seu@email.com"
+            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-wanda-500 focus:border-transparent transition-all bg-white">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">Senha</label>
+          <div class="relative">
+            <input type="password" name="password" id="password-input" required placeholder="••••••••"
+              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-wanda-500 focus:border-transparent transition-all bg-white pr-12">
+            <button type="button" onclick="togglePassword()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="flex items-center justify-between">
+          <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+            <input type="checkbox" name="remember" class="w-4 h-4 rounded accent-wanda-500">
+            Lembrar de mim
+          </label>
+        </div>
+
+        <div id="error-msg" class="hidden bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl"></div>
+
+        <button type="submit" id="submit-btn"
+          class="w-full gradient-wanda text-white font-bold py-3.5 rounded-xl hover:opacity-90 transition-all shadow-lg hover:shadow-wanda-500/30 flex items-center justify-center gap-2">
+          <span id="btn-text">Entrar</span>
+          <svg id="btn-spinner" class="hidden w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+          </svg>
+        </button>
+      </form>
+
+      <p class="text-center text-sm text-gray-500 mt-6">
+        Não tem uma conta?
+        <a href="/register" class="text-wanda-600 font-semibold hover:underline">Criar conta grátis</a>
+      </p>
+      <p class="text-center text-sm text-gray-400 mt-2">
+        <a href="/" class="hover:text-gray-600">← Voltar ao início</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePassword() {
+  const input = document.getElementById('password-input');
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('submit-btn');
+  const btnText = document.getElementById('btn-text');
+  const spinner = document.getElementById('btn-spinner');
+  const errorMsg = document.getElementById('error-msg');
+  const form = e.target;
+
+  btn.disabled = true;
+  btnText.textContent = 'Entrando...';
+  spinner.classList.remove('hidden');
+  errorMsg.classList.add('hidden');
+
+  try {
+    const resp = await fetch('/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: form.email.value,
+        password: form.password.value,
+        remember: form.remember.checked
+      })
+    });
+    const data = await resp.json();
+    if (data.success) {
+      window.location.href = data.redirect;
+    } else {
+      errorMsg.textContent = data.error || 'Erro ao fazer login.';
+      errorMsg.classList.remove('hidden');
+    }
+  } catch (err) {
+    errorMsg.textContent = 'Erro de conexão. Tente novamente.';
+    errorMsg.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btnText.textContent = 'Entrar';
+    spinner.classList.add('hidden');
+  }
+});
+</script>
+{% endblock %}

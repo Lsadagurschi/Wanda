@@ -1,0 +1,122 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Dashboard — Wanda{% endblock %}
+
+{% block dashboard_content %}
+<div class="animate-fade-in">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">Olá, {{ current_user.name.split()[0] }}! 👋</h1>
+    <p class="text-gray-500 mt-1">Bem-vindo ao seu painel de análise de dados.</p>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    {% set stat_cards = [
+      ('Total de Consultas', stats.total_queries, '🔍', 'wanda'),
+      ('Conexões Ativas', stats.connections, '🔗', 'blue'),
+      ('Feedbacks Positivos', stats.positive_feedback, '👍', 'green'),
+      ('Consultas esta semana', stats.week_queries, '📅', 'orange'),
+    ] %}
+    {% for label, value, icon, color in stat_cards %}
+    <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm card-hover">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-2xl">{{ icon }}</span>
+        <span class="text-xs font-medium text-gray-400 bg-gray-50 px-2 py-1 rounded-lg">Total</span>
+      </div>
+      <p class="text-3xl font-bold text-gray-900">{{ value }}</p>
+      <p class="text-sm text-gray-500 mt-1">{{ label }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-6">
+    <!-- Quick Query -->
+    <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+      <h2 class="text-lg font-bold text-gray-900 mb-4">Consulta Rápida</h2>
+      {% if connections %}
+      <div class="space-y-3">
+        <select id="quick-conn" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+          <option value="">Selecionar conexão...</option>
+          {% for c in connections %}
+          <option value="{{ c.id }}">{{ c.name }} ({{ c.db_type }})</option>
+          {% endfor %}
+        </select>
+        <div class="flex gap-2">
+          <input type="text" id="quick-question" placeholder="Ex: Quantos clientes temos no total?"
+            class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+          <a href="/dashboard/query" class="gradient-wanda text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity whitespace-nowrap">
+            Ir para consultas →
+          </a>
+        </div>
+      </div>
+      {% else %}
+      <div class="text-center py-8">
+        <div class="text-5xl mb-3">🔗</div>
+        <p class="text-gray-500 mb-4">Nenhuma conexão configurada ainda.</p>
+        <a href="/dashboard/connections" class="gradient-wanda text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity">
+          Adicionar Conexão
+        </a>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Saved Queries -->
+    <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold text-gray-900">Consultas Salvas</h2>
+        <a href="/dashboard/saved-queries" class="text-wanda-600 text-sm hover:underline">Ver todas</a>
+      </div>
+      {% if saved_queries %}
+      <div class="space-y-2">
+        {% for q in saved_queries %}
+        <a href="/dashboard/query?load={{ q.id }}" class="block p-3 rounded-xl hover:bg-wanda-50 transition-colors border border-transparent hover:border-wanda-100">
+          <p class="text-sm font-medium text-gray-800 truncate">{{ q.title or q.natural_language[:40] }}</p>
+          <p class="text-xs text-gray-400 mt-0.5">{{ q.created_at.strftime('%d/%m/%Y') }}</p>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-gray-400 text-sm text-center py-4">Nenhuma consulta salva ainda.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Recent Queries -->
+  {% if recent_queries %}
+  <div class="mt-6 bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-bold text-gray-900">Atividade Recente</h2>
+      <a href="/dashboard/history" class="text-wanda-600 text-sm hover:underline">Ver histórico</a>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-100">
+            <th class="text-left py-2 px-3 text-gray-500 font-medium">Pergunta</th>
+            <th class="text-left py-2 px-3 text-gray-500 font-medium hidden md:table-cell">Linhas</th>
+            <th class="text-left py-2 px-3 text-gray-500 font-medium hidden md:table-cell">Feedback</th>
+            <th class="text-left py-2 px-3 text-gray-500 font-medium">Data</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          {% for q in recent_queries %}
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="py-3 px-3">
+              <p class="text-gray-800 font-medium truncate max-w-xs">{{ q.natural_language[:60] }}{% if q.natural_language|length > 60 %}...{% endif %}</p>
+            </td>
+            <td class="py-3 px-3 hidden md:table-cell text-gray-500">{{ q.row_count or '—' }}</td>
+            <td class="py-3 px-3 hidden md:table-cell">
+              {% if q.feedback == 1 %}<span class="text-green-500">👍</span>
+              {% elif q.feedback == -1 %}<span class="text-red-500">👎</span>
+              {% else %}<span class="text-gray-300">—</span>{% endif %}
+            </td>
+            <td class="py-3 px-3 text-gray-400 text-xs">{{ q.created_at.strftime('%d/%m %H:%M') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

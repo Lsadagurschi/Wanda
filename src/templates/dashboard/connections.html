@@ -1,0 +1,215 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Conexões — Wanda{% endblock %}
+
+{% block dashboard_content %}
+<div class="animate-fade-in max-w-4xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Conexões de Banco de Dados</h1>
+      <p class="text-gray-500 mt-1">Gerencie suas conexões para consultar dados com a Wanda.</p>
+    </div>
+    <button onclick="openModal()"
+      class="gradient-wanda text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-all shadow-md">
+      + Nova Conexão
+    </button>
+  </div>
+
+  <!-- Connections List -->
+  {% if connections %}
+  <div class="space-y-4">
+    {% for conn in connections %}
+    <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm card-hover">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl
+            {% if conn.db_type == 'postgresql' %}bg-blue-50{% elif conn.db_type == 'mysql' %}bg-orange-50{% else %}bg-gray-50{% endif %}">
+            {% if conn.db_type == 'postgresql' %}🐘{% elif conn.db_type == 'mysql' %}🐬{% elif conn.db_type == 'sqlite' %}📁{% else %}🗄️{% endif %}
+          </div>
+          <div>
+            <h3 class="font-bold text-gray-900">{{ conn.name }}</h3>
+            <p class="text-sm text-gray-500">
+              {{ conn.db_type | upper }} •
+              {% if conn.host %}{{ conn.host }}:{{ conn.port or '5432' }}/{{ conn.database }}{% else %}{{ conn.database }}{% endif %}
+            </p>
+            {% if conn.last_tested %}
+            <p class="text-xs text-green-600 mt-0.5">✓ Testado em {{ conn.last_tested.strftime('%d/%m/%Y %H:%M') }}</p>
+            {% endif %}
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="testConn({{ conn.id }}, this)"
+            class="text-xs border border-gray-200 hover:border-blue-400 hover:text-blue-600 px-3 py-1.5 rounded-lg transition-all">
+            Testar
+          </button>
+          <a href="/dashboard/query?conn={{ conn.id }}"
+            class="text-xs gradient-wanda text-white px-3 py-1.5 rounded-lg hover:opacity-90 transition-all">
+            Consultar
+          </a>
+          <button onclick="deleteConn({{ conn.id }}, this)"
+            class="text-xs border border-gray-200 hover:border-red-400 hover:text-red-600 px-3 py-1.5 rounded-lg transition-all">
+            Remover
+          </button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="bg-white rounded-2xl border border-gray-100 p-12 shadow-sm text-center">
+    <div class="text-6xl mb-4">🔗</div>
+    <h3 class="text-xl font-bold text-gray-900 mb-2">Nenhuma conexão ainda</h3>
+    <p class="text-gray-500 mb-6">Adicione seu primeiro banco de dados para começar a fazer consultas.</p>
+    <button onclick="openModal()" class="gradient-wanda text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
+      Adicionar Conexão
+    </button>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Modal Nova Conexão -->
+<div id="conn-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+  <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-bold text-gray-900">Nova Conexão</h2>
+      <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">✕</button>
+    </div>
+
+    <form id="conn-form" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Nome da conexão</label>
+        <input type="text" name="name" required placeholder="Ex: Banco de Produção"
+          class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de banco</label>
+        <select name="db_type" id="db-type-select" onchange="updatePortHint()"
+          class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+          <option value="postgresql">PostgreSQL</option>
+          <option value="mysql">MySQL</option>
+          <option value="sqlite">SQLite (arquivo local)</option>
+          <option value="mssql">SQL Server</option>
+        </select>
+      </div>
+
+      <div id="host-fields">
+        <div class="grid grid-cols-3 gap-3">
+          <div class="col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Host</label>
+            <input type="text" name="host" placeholder="localhost ou IP"
+              class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Porta</label>
+            <input type="number" name="port" id="port-input" placeholder="5432"
+              class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+          </div>
+        </div>
+        <div class="mt-3">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nome do banco</label>
+          <input type="text" name="database" placeholder="nome_do_banco"
+            class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+        </div>
+        <div class="grid grid-cols-2 gap-3 mt-3">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Usuário</label>
+            <input type="text" name="username" placeholder="postgres"
+              class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+            <input type="password" name="password" placeholder="••••••••"
+              class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+          </div>
+        </div>
+      </div>
+
+      <div id="error-conn" class="hidden bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl"></div>
+      <div id="success-conn" class="hidden bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-xl"></div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="button" onclick="closeModal()"
+          class="flex-1 border-2 border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-medium hover:border-gray-300 transition-all">
+          Cancelar
+        </button>
+        <button type="submit" id="conn-submit-btn"
+          class="flex-1 gradient-wanda text-white py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-all flex items-center justify-center gap-2">
+          <span id="conn-btn-text">Conectar e Salvar</span>
+          <svg id="conn-spinner" class="hidden w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+          </svg>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openModal() { document.getElementById('conn-modal').classList.remove('hidden'); }
+function closeModal() { document.getElementById('conn-modal').classList.add('hidden'); document.getElementById('conn-form').reset(); document.getElementById('error-conn').classList.add('hidden'); document.getElementById('success-conn').classList.add('hidden'); }
+
+function updatePortHint() {
+  const type = document.getElementById('db-type-select').value;
+  const ports = { postgresql: '5432', mysql: '3306', mssql: '1433', sqlite: '' };
+  document.getElementById('port-input').placeholder = ports[type] || '';
+  document.getElementById('host-fields').style.display = type === 'sqlite' ? 'none' : 'block';
+}
+
+async function testConn(id, btn) {
+  const orig = btn.textContent;
+  btn.textContent = 'Testando...';
+  btn.disabled = true;
+  const resp = await fetch(`/api/connections/${id}/test`, { method: 'POST' });
+  const data = await resp.json();
+  btn.textContent = data.success ? '✓ OK' : '✗ Falhou';
+  btn.className = `text-xs border px-3 py-1.5 rounded-lg transition-all ${data.success ? 'border-green-400 text-green-600' : 'border-red-400 text-red-600'}`;
+  setTimeout(() => { btn.textContent = orig; btn.disabled = false; btn.className = 'text-xs border border-gray-200 hover:border-blue-400 hover:text-blue-600 px-3 py-1.5 rounded-lg transition-all'; }, 3000);
+}
+
+async function deleteConn(id, btn) {
+  if (!confirm('Remover esta conexão?')) return;
+  await fetch(`/api/connections/${id}`, { method: 'DELETE' });
+  btn.closest('.card-hover').remove();
+}
+
+document.getElementById('conn-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const btn = document.getElementById('conn-submit-btn');
+  document.getElementById('conn-btn-text').textContent = 'Conectando...';
+  document.getElementById('conn-spinner').classList.remove('hidden');
+  btn.disabled = true;
+  document.getElementById('error-conn').classList.add('hidden');
+
+  const payload = {
+    name: form.name.value,
+    db_type: form.db_type.value,
+    host: form.host?.value,
+    port: form.port?.value ? parseInt(form.port.value) : null,
+    database: form.database?.value,
+    username: form.username?.value,
+    password: form.password?.value
+  };
+
+  try {
+    const resp = await fetch('/api/connections', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const data = await resp.json();
+    if (data.success) {
+      document.getElementById('success-conn').textContent = data.message;
+      document.getElementById('success-conn').classList.remove('hidden');
+      setTimeout(() => window.location.reload(), 1500);
+    } else {
+      document.getElementById('error-conn').textContent = data.error;
+      document.getElementById('error-conn').classList.remove('hidden');
+    }
+  } catch (err) {
+    document.getElementById('error-conn').textContent = 'Erro de conexão.';
+    document.getElementById('error-conn').classList.remove('hidden');
+  } finally {
+    document.getElementById('conn-btn-text').textContent = 'Conectar e Salvar';
+    document.getElementById('conn-spinner').classList.add('hidden');
+    btn.disabled = false;
+  }
+});
+</script>
+{% endblock %}

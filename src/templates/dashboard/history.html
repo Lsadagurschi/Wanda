@@ -1,0 +1,72 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Histórico — Wanda{% endblock %}
+
+{% block dashboard_content %}
+<div class="animate-fade-in max-w-4xl mx-auto">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Histórico de Consultas</h1>
+    <p class="text-gray-500 mt-1">Todas as perguntas que você fez à Wanda.</p>
+  </div>
+
+  {% if queries.items %}
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 border-b border-gray-100">
+        <tr>
+          <th class="text-left px-6 py-3 text-gray-500 font-medium">Pergunta</th>
+          <th class="text-left px-4 py-3 text-gray-500 font-medium hidden md:table-cell">Linhas</th>
+          <th class="text-left px-4 py-3 text-gray-500 font-medium hidden md:table-cell">Feedback</th>
+          <th class="text-left px-4 py-3 text-gray-500 font-medium">Data</th>
+          <th class="px-4 py-3"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-50">
+        {% for q in queries.items %}
+        <tr class="hover:bg-gray-50 transition-colors">
+          <td class="px-6 py-4">
+            <p class="text-gray-800 font-medium">{{ q.natural_language[:80] }}{% if q.natural_language|length > 80 %}...{% endif %}</p>
+            {% if q.title %}<p class="text-xs text-wanda-600 mt-0.5">💾 {{ q.title }}</p>{% endif %}
+          </td>
+          <td class="px-4 py-4 hidden md:table-cell text-gray-500">{{ q.row_count or '—' }}</td>
+          <td class="px-4 py-4 hidden md:table-cell">
+            {% if q.feedback == 1 %}<span class="text-green-500 text-lg">👍</span>
+            {% elif q.feedback == -1 %}<span class="text-red-500 text-lg">👎</span>
+            {% else %}<span class="text-gray-300">—</span>{% endif %}
+          </td>
+          <td class="px-4 py-4 text-gray-400 text-xs whitespace-nowrap">{{ q.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+          <td class="px-4 py-4">
+            <a href="/dashboard/query?load={{ q.id }}" class="text-xs text-wanda-600 hover:underline">Abrir</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    {% if queries.pages > 1 %}
+    <div class="flex items-center justify-between px-6 py-4 border-t border-gray-100">
+      <p class="text-sm text-gray-500">Página {{ queries.page }} de {{ queries.pages }}</p>
+      <div class="flex gap-2">
+        {% if queries.has_prev %}
+        <a href="?page={{ queries.prev_num }}" class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:border-wanda-300 hover:text-wanda-600 transition-all">← Anterior</a>
+        {% endif %}
+        {% if queries.has_next %}
+        <a href="?page={{ queries.next_num }}" class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:border-wanda-300 hover:text-wanda-600 transition-all">Próxima →</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  {% else %}
+  <div class="bg-white rounded-2xl border border-gray-100 p-12 shadow-sm text-center">
+    <div class="text-6xl mb-4">🔍</div>
+    <h3 class="text-xl font-bold text-gray-900 mb-2">Nenhuma consulta ainda</h3>
+    <p class="text-gray-500 mb-6">Faça sua primeira pergunta para ver o histórico aqui.</p>
+    <a href="/dashboard/query" class="gradient-wanda text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
+      Fazer Primeira Consulta
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

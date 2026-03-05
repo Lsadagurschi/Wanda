@@ -1,0 +1,45 @@
+version: '3.9'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: wanda_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-wandapass123}
+      MYSQL_DATABASE: ${DB_NAME:-wanda}
+      MYSQL_USER: ${DB_USERNAME:-wanda}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-wandapass123}
+    ports:
+      - "3306:3306"
+    volumes:
+      - wanda_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 10
+      interval: 5s
+
+  app:
+    build: .
+    container_name: wanda_app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      SECRET_KEY: ${SECRET_KEY:-wanda-secret-change-me}
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-wanda}
+      DB_USERNAME: ${DB_USERNAME:-wanda}
+      DB_PASSWORD: ${DB_PASSWORD:-wandapass123}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      FLASK_DEBUG: ${FLASK_DEBUG:-false}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+
+volumes:
+  wanda_db_data:

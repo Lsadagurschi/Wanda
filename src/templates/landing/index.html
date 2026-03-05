@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% block title %}Wanda — Transforme Perguntas em Dados{% endblock %}
+
+{% block body %}
+<!-- NAVBAR -->
+<nav class="fixed top-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2">
+      <div class="w-9 h-9 gradient-wanda rounded-xl flex items-center justify-center shadow-md">
+        <span class="text-white font-bold text-lg">W</span>
+      </div>
+      <span class="text-xl font-bold gradient-text">Wanda</span>
+    </a>
+    <div class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
+      <a href="#features" class="hover:text-wanda-600 transition-colors">Funcionalidades</a>
+      <a href="#how-it-works" class="hover:text-wanda-600 transition-colors">Como Funciona</a>
+      <a href="#pricing" class="hover:text-wanda-600 transition-colors">Planos</a>
+      <a href="#testimonials" class="hover:text-wanda-600 transition-colors">Depoimentos</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="/login" class="text-sm font-medium text-gray-600 hover:text-wanda-600 transition-colors px-4 py-2">Entrar</a>
+      <a href="/register" class="gradient-wanda text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity shadow-md">
+        Começar Grátis
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="pt-32 pb-20 px-6 overflow-hidden" style="background: linear-gradient(180deg, #f3f0ff 0%, #ffffff 100%);">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center max-w-4xl mx-auto">
+      <div class="inline-flex items-center gap-2 bg-wanda-50 border border-wanda-200 text-wanda-700 text-sm font-medium px-4 py-2 rounded-full mb-6">
+        <span class="w-2 h-2 bg-wanda-500 rounded-full pulse-dot"></span>
+        Powered by Claude AI (Anthropic)
+      </div>
+      <h1 class="text-5xl md:text-7xl font-extrabold text-gray-900 leading-tight mb-6">
+        Pergunte em<br>
+        <span class="gradient-text">português.</span><br>
+        Obtenha dados.
+      </h1>
+      <p class="text-xl text-gray-500 mb-10 max-w-2xl mx-auto leading-relaxed">
+        A Wanda transforma perguntas em linguagem natural em consultas SQL precisas. Conecte seu banco de dados e comece a extrair insights sem escrever uma linha de código.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/register" class="gradient-wanda text-white font-bold px-8 py-4 rounded-2xl text-lg hover:opacity-90 transition-all shadow-xl hover:shadow-wanda-500/30 hover:-translate-y-1">
+          Experimentar Gratuitamente →
+        </a>
+        <a href="#how-it-works" class="bg-white border-2 border-gray-200 text-gray-700 font-semibold px-8 py-4 rounded-2xl text-lg hover:border-wanda-300 transition-all">
+          Ver como funciona
+        </a>
+      </div>
+      <p class="text-sm text-gray-400 mt-4">Sem cartão de crédito • 14 dias grátis no plano Pro</p>
+    </div>
+
+    <!-- Demo Card -->
+    <div class="mt-16 max-w-3xl mx-auto">
+      <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
+        <div class="bg-gray-800 px-6 py-3 flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full bg-red-400"></div>
+          <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+          <div class="w-3 h-3 rounded-full bg-green-400"></div>
+          <span class="ml-3 text-gray-400 text-sm">Wanda — Interface de Consulta</span>
+        </div>
+        <div class="p-6">
+          <div class="bg-wanda-50 border border-wanda-200 rounded-2xl p-4 mb-4">
+            <p class="text-sm text-gray-500 mb-1">Sua pergunta:</p>
+            <p class="text-gray-800 font-medium">"Quais foram os 5 produtos mais vendidos no último trimestre, com o total de receita de cada um?"</p>
+          </div>
+          <div class="sql-block rounded-xl p-4 mb-4 font-mono text-sm">
+            <p class="text-gray-400 text-xs mb-2">-- SQL gerado pela Wanda</p>
+            <p><span class="text-purple-400">SELECT</span> p.nome_produto,</p>
+            <p class="pl-4">SUM(v.quantidade) <span class="text-blue-400">AS</span> total_vendido,</p>
+            <p class="pl-4">SUM(v.quantidade * p.preco) <span class="text-blue-400">AS</span> receita_total</p>
+            <p><span class="text-purple-400">FROM</span> vendas v</p>
+            <p><span class="text-purple-400">JOIN</span> produtos p <span class="text-blue-400">ON</span> v.produto_id = p.id</p>
+            <p><span class="text-purple-400">WHERE</span> v.data >= DATE_SUB(NOW(), <span class="text-green-400">INTERVAL</span> 3 MONTH)</p>
+            <p><span class="text-purple-400">GROUP BY</span> p.nome_produto</p>
+            <p><span class="text-purple-400">ORDER BY</span> receita_total <span class="text-blue-400">DESC</span></p>
+            <p><span class="text-purple-400">LIMIT</span> <span class="text-orange-400">5</span>;</p>
+          </div>
+          <div class="overflow-x-auto rounded-xl border border-gray-100">
+            <table class="w-full text-sm">
+              <thead class="bg-wanda-500 text-white">
+                <tr>
+                  <th class="px-4 py-2 text-left">Produto</th>
+                  <th class="px-4 py-2 text-right">Vendas</th>
+                  <th class="px-4 py-2 text-right">Receita</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr class="hover:bg-gray-50"><td class="px-4 py-2">Notebook Pro X</td><td class="px-4 py-2 text-right">1.247</td><td class="px-4 py-2 text-right text-green-600 font-medium">R$ 2.493.000</td></tr>
+                <tr class="hover:bg-gray-50 bg-wanda-50/30"><td class="px-4 py-2">Monitor 4K Ultra</td><td class="px-4 py-2 text-right">892</td><td class="px-4 py-2 text-right text-green-600 font-medium">R$ 1.338.000</td></tr>
+                <tr class="hover:bg-gray-50"><td class="px-4 py-2">Teclado Mecânico</td><td class="px-4 py-2 text-right">2.103</td><td class="px-4 py-2 text-right text-green-600 font-medium">R$ 840.000</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LOGOS / SOCIAL PROOF -->
+<section class="py-12 bg-white border-y border-gray-100">
+  <div class="max-w-7xl mx-auto px-6 text-center">
+    <p class="text-sm text-gray-400 font-medium mb-6 uppercase tracking-wider">Compatível com os principais bancos de dados</p>
+    <div class="flex flex-wrap justify-center gap-8 items-center">
+      {% for db in [('PostgreSQL', '#336791'), ('MySQL', '#4479A1'), ('SQL Server', '#CC2927'), ('SQLite', '#003B57')] %}
+      <div class="flex items-center gap-2 text-gray-500 font-semibold text-sm">
+        <div class="w-2 h-2 rounded-full" style="background: {{ db[1] }}"></div>
+        {{ db[0] }}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="py-24 px-6 bg-white">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl font-bold text-gray-900 mb-4">Tudo que você precisa para <span class="gradient-text">explorar seus dados</span></h2>
+      <p class="text-lg text-gray-500 max-w-2xl mx-auto">Da pergunta ao insight em segundos. Sem SQL. Sem complexidade.</p>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {% set features = [
+        ('🔮', 'NL para SQL com IA', 'Claude AI converte suas perguntas em português para SQL preciso e otimizado automaticamente.', 'wanda'),
+        ('📊', 'Dashboards Interativos', 'Visualize resultados em gráficos de linha, barras, pizza e dispersão com um clique.', 'blue'),
+        ('🔗', 'Multi-banco de Dados', 'Conecte PostgreSQL, MySQL, SQL Server e SQLite. Gerencie múltiplas conexões.', 'green'),
+        ('💾', 'Salve suas Consultas', 'Organize e reutilize consultas frequentes. Histórico completo de todas as perguntas.', 'orange'),
+        ('📤', 'Exportação Fácil', 'Exporte resultados para CSV (Excel) ou gere relatórios em PDF com um clique.', 'pink'),
+        ('🧠', 'Aprendizado Contínuo', 'Sistema de feedback positivo/negativo melhora a precisão das respostas ao longo do tempo.', 'purple'),
+      ] %}
+      {% for icon, title, desc, color in features %}
+      <div class="card-hover bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+        <div class="text-4xl mb-4">{{ icon }}</div>
+        <h3 class="text-lg font-bold text-gray-900 mb-2">{{ title }}</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">{{ desc }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works" class="py-24 px-6" style="background: linear-gradient(180deg, #f8f7ff 0%, #ffffff 100%);">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl font-bold text-gray-900 mb-4">Como funciona em <span class="gradient-text">3 passos</span></h2>
+    </div>
+    <div class="grid md:grid-cols-3 gap-8">
+      {% for step, title, desc in [
+        ('1', 'Conecte seu banco', 'Informe as credenciais do seu banco de dados. A Wanda extrai o schema automaticamente e aprende a estrutura dos seus dados.'),
+        ('2', 'Faça sua pergunta', 'Digite sua pergunta em português, como faria com um analista humano. Sem SQL, sem jargões técnicos.'),
+        ('3', 'Obtenha resultados', 'Veja o SQL gerado, os dados em tabela, gráficos interativos e exporte para CSV ou PDF.'),
+      ] %}
+      <div class="text-center">
+        <div class="w-16 h-16 gradient-wanda rounded-2xl flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6 shadow-lg">{{ step }}</div>
+        <h3 class="text-xl font-bold text-gray-900 mb-3">{{ title }}</h3>
+        <p class="text-gray-500 leading-relaxed">{{ desc }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" class="py-24 px-6 bg-white">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl font-bold text-gray-900 mb-4">Planos para cada <span class="gradient-text">necessidade</span></h2>
+      <p class="text-lg text-gray-500">Comece grátis. Escale conforme cresce.</p>
+    </div>
+    <div class="grid md:grid-cols-4 gap-6">
+      {% set plans = [
+        ('Gratuito', 'R$ 0', '/mês', ['50 consultas/mês', '1 conexão de banco', 'Exportação CSV', 'Suporte por e-mail'], False, 'free'),
+        ('Starter', 'R$ 97', '/mês', ['500 consultas/mês', '3 conexões de banco', 'Exportação CSV e PDF', 'Dashboards básicos', 'Suporte prioritário'], False, 'starter'),
+        ('Pro', 'R$ 297', '/mês', ['Consultas ilimitadas', '10 conexões de banco', 'Todos os gráficos', 'API de acesso', 'Histórico completo', 'Suporte dedicado'], True, 'pro'),
+        ('Enterprise', 'Sob consulta', '', ['Tudo do Pro', 'Conexões ilimitadas', 'SSO / LDAP', 'Deploy on-premise', 'SLA garantido', 'Gerente de conta'], False, 'enterprise'),
+      ] %}
+      {% for name, price, period, features, popular, plan_id in plans %}
+      <div class="card-hover rounded-2xl border-2 p-6 relative
+        {% if popular %}border-wanda-500 shadow-xl shadow-wanda-500/20{% else %}border-gray-100{% endif %}">
+        {% if popular %}
+        <div class="absolute -top-3 left-1/2 -translate-x-1/2 gradient-wanda text-white text-xs font-bold px-4 py-1 rounded-full">MAIS POPULAR</div>
+        {% endif %}
+        <h3 class="text-lg font-bold text-gray-900 mb-1">{{ name }}</h3>
+        <div class="flex items-baseline gap-1 mb-4">
+          <span class="text-3xl font-extrabold {% if popular %}gradient-text{% else %}text-gray-900{% endif %}">{{ price }}</span>
+          <span class="text-gray-400 text-sm">{{ period }}</span>
+        </div>
+        <ul class="space-y-2 mb-6">
+          {% for f in features %}
+          <li class="flex items-center gap-2 text-sm text-gray-600">
+            <span class="text-green-500 font-bold">✓</span> {{ f }}
+          </li>
+          {% endfor %}
+        </ul>
+        <a href="/register?plan={{ plan_id }}"
+           class="block text-center py-3 rounded-xl font-semibold text-sm transition-all
+           {% if popular %}gradient-wanda text-white hover:opacity-90{% else %}border-2 border-gray-200 text-gray-700 hover:border-wanda-300 hover:text-wanda-600{% endif %}">
+          {% if plan_id == 'free' %}Começar Grátis{% elif plan_id == 'enterprise' %}Falar com Vendas{% else %}Assinar Agora{% endif %}
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="py-24 px-6 gradient-wanda">
+  <div class="max-w-4xl mx-auto text-center">
+    <h2 class="text-4xl font-bold text-white mb-4">Pronto para transformar seus dados?</h2>
+    <p class="text-wanda-100 text-lg mb-8">Junte-se a centenas de empresas que já usam a Wanda para tomar decisões mais rápidas e inteligentes.</p>
+    <a href="/register" class="bg-white text-wanda-600 font-bold px-10 py-4 rounded-2xl text-lg hover:bg-wanda-50 transition-colors shadow-xl">
+      Começar Gratuitamente →
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-gray-900 text-gray-400 py-12 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 gradient-wanda rounded-lg flex items-center justify-center">
+          <span class="text-white font-bold">W</span>
+        </div>
+        <span class="text-white font-bold text-lg">Wanda</span>
+      </div>
+      <p class="text-sm">© 2024 Wanda. Todos os direitos reservados.</p>
+      <div class="flex gap-6 text-sm">
+        <a href="#" class="hover:text-white transition-colors">Privacidade</a>
+        <a href="#" class="hover:text-white transition-colors">Termos</a>
+        <a href="mailto:contato@wanda.app" class="hover:text-white transition-colors">Contato</a>
+      </div>
+    </div>
+  </div>
+</footer>
+{% endblock %}
