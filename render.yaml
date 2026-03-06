@@ -3,21 +3,13 @@ services:
     name: wanda-app
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --workers 2 --timeout 120
+    startCommand: gunicorn app:app --workers 2 --timeout 120 --bind 0.0.0.0:$PORT
     envVars:
       - key: SECRET_KEY
         generateValue: true
       - key: ANTHROPIC_API_KEY
         sync: false
-      - key: DB_HOST
-        sync: false
-      - key: DB_PORT
-        value: "3306"
-      - key: DB_NAME
-        value: wanda
-      - key: DB_USERNAME
-        sync: false
-      - key: DB_PASSWORD
+      - key: DATABASE_URL
         sync: false
       - key: FLASK_DEBUG
         value: "false"
