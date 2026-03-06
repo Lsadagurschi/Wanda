@@ -72,7 +72,7 @@ Responda SEMPRE em JSON com este formato exato:
 
     try:
         response = client.messages.create(
-            model=os.getenv('ANTHROPIC_MODEL', 'claude-sonnet-4-6'),
+            model=os.getenv('ANTHROPIC_MODEL', 'claude-sonnet-4-20250514'),
             max_tokens=2048,
             system=system_prompt,
             messages=[{"role": "user", "content": user_message}]
