@@ -67,9 +67,18 @@ def create_app():
     app.register_blueprint(connections_bp)
     app.register_blueprint(query_bp)
 
-    # Criar tabelas
+    # Criar tabelas (checkfirst=True evita erro se tabelas já existem)
     with app.app_context():
-        db.create_all()
+        try:
+            db.create_all(checkfirst=True)
+        except Exception:
+            # Fallback: criar tabela por tabela ignorando as que já existem
+            from sqlalchemy import inspect as sa_inspect
+            inspector = sa_inspect(db.engine)
+            existing = inspector.get_table_names()
+            for table in db.metadata.sorted_tables:
+                if table.name not in existing:
+                    table.create(db.engine)
 
     return app
 
