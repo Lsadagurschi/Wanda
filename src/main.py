@@ -27,7 +27,12 @@ def create_app():
             # Fallback para SQLite — funciona sem banco externo
             _sqlite_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'wanda.db')
             _db_url = f"sqlite:///{_sqlite_path}"
-    # Corrigir URL do Postgres no Heroku/Railway (postgres:// -> postgresql://)
+    # Corrigir dialetos de banco de dados para usar drivers Python puros
+    # mysql:// ou mysql+mysqldb:// -> mysql+pymysql:// (evita dependência de mysqlclient C)
+    if _db_url.startswith('mysql://') or _db_url.startswith('mysql+mysqldb://'):
+        _db_url = _db_url.replace('mysql://', 'mysql+pymysql://', 1)
+        _db_url = _db_url.replace('mysql+mysqldb://', 'mysql+pymysql://', 1)
+    # postgres:// -> postgresql+psycopg2:// (Heroku/Railway)
     if _db_url.startswith('postgres://'):
         _db_url = _db_url.replace('postgres://', 'postgresql+psycopg2://', 1)
     app.config['SQLALCHEMY_DATABASE_URI'] = _db_url
