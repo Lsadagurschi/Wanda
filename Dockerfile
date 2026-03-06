@@ -16,11 +16,15 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar código
 COPY . .
 
+# Tornar o script de start executável
+RUN chmod +x start.sh
+
 # Variáveis de ambiente padrão
 ENV FLASK_APP=src/main.py
 ENV FLASK_ENV=production
 ENV PORT=5000
 
-EXPOSE 5000
+EXPOSE ${PORT}
 
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "120"]
+# Usa script shell para expandir $PORT em tempo de execução
+CMD ["sh", "start.sh"]
