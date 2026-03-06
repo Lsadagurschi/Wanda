@@ -12,10 +12,25 @@ def create_app():
 
     # Configurações
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'wanda-secret-key-change-in-production-2024')
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
-        'DATABASE_URL',
-        f"mysql+pymysql://{os.getenv('DB_USERNAME', 'root')}:{os.getenv('DB_PASSWORD', 'password')}@{os.getenv('DB_HOST', 'localhost')}:{os.getenv('DB_PORT', '3306')}/{os.getenv('DB_NAME', 'wanda')}"
-    )
+    # Determinar URL do banco de dados
+    # Prioridade: DATABASE_URL > variáveis individuais DB_* > SQLite (fallback)
+    _db_url = os.getenv('DATABASE_URL')
+    if not _db_url:
+        _db_user = os.getenv('DB_USERNAME')
+        _db_pass = os.getenv('DB_PASSWORD')
+        _db_host = os.getenv('DB_HOST')
+        _db_name = os.getenv('DB_NAME', 'wanda')
+        _db_port = os.getenv('DB_PORT', '3306')
+        if _db_user and _db_pass and _db_host:
+            _db_url = f"mysql+pymysql://{_db_user}:{_db_pass}@{_db_host}:{_db_port}/{_db_name}"
+        else:
+            # Fallback para SQLite — funciona sem banco externo
+            _sqlite_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'wanda.db')
+            _db_url = f"sqlite:///{_sqlite_path}"
+    # Corrigir URL do Postgres no Heroku/Railway (postgres:// -> postgresql://)
+    if _db_url.startswith('postgres://'):
+        _db_url = _db_url.replace('postgres://', 'postgresql+psycopg2://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = _db_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
         'pool_recycle': 280,
