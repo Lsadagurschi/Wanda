@@ -9,98 +9,130 @@ Este documento descreve a arquitetura técnica da plataforma Wanda, detalhando s
 
 ## 1. Diagrama de Arquitetura Geral (SaaS)
 
-A versão SaaS da Wanda, hospedada no Railway, segue uma arquitetura de microsserviços desacoplada, otimizada para escalabilidade e resiliência.
+A versão SaaS da Wanda, hospedada no Railway, segue uma arquitetura desacoplada otimizada para escalabilidade e resiliência.
 
 ```mermaid
 graph TD
-    subgraph Internet
-        U[Usuário Final] -- HTTPS --> LB(Railway Load Balancer);
-    end
-
-    subgraph Railway Cloud
-        LB -- encaminha para --> App(Wanda Web App);
-        App -- armazena dados em --> DB[(Railway MySQL)];
-        App -- consulta IA em --> Claude(Anthropic Claude API);
-    end
-
-    subgraph Bancos do Cliente
-        DB1[PostgreSQL];
-        DB2[MySQL];
-        DB3[Neon / Supabase];
-    end
-
-    App -- SSL/TLS --> DB1;
-    App -- SSL/TLS --> DB2;
-    App -- SSL/TLS --> DB3;
+    U[Usuario Final] -- HTTPS --> LB[Railway Load Balancer]
+    LB -- encaminha para --> App[Wanda Web App]
+    App -- armazena dados em --> DB[(Railway MySQL)]
+    App -- consulta IA em --> Claude[Anthropic Claude API]
+    App -- SSL/TLS --> DB1[(PostgreSQL do Cliente)]
+    App -- SSL/TLS --> DB2[(MySQL do Cliente)]
+    App -- SSL/TLS --> DB3[(Neon / Supabase)]
 
     style App fill:#4c1d95,stroke:#a78bfa,stroke-width:2px,color:#fff
     style DB fill:#059669,stroke:#34d399,stroke-width:2px,color:#fff
     style Claude fill:#f59e0b,stroke:#facc15,stroke-width:2px,color:#000
+    style LB fill:#1e40af,stroke:#60a5fa,stroke-width:2px,color:#fff
 ```
 
 | Componente | Tecnologia | Descrição |
 | :--- | :--- | :--- |
-| **Wanda Web App** | Python (Flask), Gunicorn | Aplicação principal que serve a interface do usuário, gerencia a lógica de negócio e orquestra as chamadas para outros serviços. |
-| **Railway MySQL** | MySQL | Banco de dados gerenciado que armazena os dados da aplicação Wanda (usuários, conexões, histórico de consultas). |
-| **Anthropic Claude API** | API REST | Serviço de IA externo que recebe a pergunta do usuário e o schema do banco, e retorna a consulta SQL correspondente. |
-| **Bancos do Cliente** | PostgreSQL, MySQL, etc. | Bancos de dados externos pertencentes ao cliente, dos quais os dados são extraídos. A Wanda se conecta a eles em modo de apenas leitura. |
+| **Wanda Web App** | Python Flask + Gunicorn | Aplicação principal: interface web, lógica de negócio e orquestração de serviços. |
+| **Railway MySQL** | MySQL gerenciado | Banco de dados da aplicação Wanda (usuários, conexões, histórico de consultas). |
+| **Anthropic Claude API** | API REST | Serviço de IA que recebe a pergunta e o schema do banco, e retorna a consulta SQL. |
+| **Bancos do Cliente** | PostgreSQL, MySQL, etc. | Bancos externos do cliente, acessados em modo somente leitura pela Wanda. |
+
+---
 
 ## 2. Fluxo de Dados de uma Consulta NL2SQL
 
-O fluxo de uma consulta em linguagem natural é o coração da plataforma. Ele envolve múltiplos componentes trabalhando em sequência para garantir segurança e precisão.
+O fluxo de uma consulta em linguagem natural envolve múltiplos componentes trabalhando em sequência para garantir segurança e precisão.
 
-1.  **Usuário faz a pergunta:** O usuário digita uma pergunta (ex: "Quais os 5 clientes com maior faturamento?") na interface web.
-2.  **Extração de Schema:** A aplicação Wanda se conecta ao banco de dados do cliente (com as credenciais criptografadas) e extrai apenas os metadados (nomes de tabelas e colunas). **Nenhum dado de negócio é lido ou armazenado.**
-3.  **Chamada para a IA:** A aplicação envia a pergunta do usuário e o schema do banco para a API do Claude (Anthropic).
-4.  **Geração do SQL:** O Claude analisa a pergunta e o schema, e retorna uma consulta SQL otimizada para responder à pergunta.
-5.  **Validação de Segurança:** A aplicação Wanda analisa o SQL recebido para garantir que ele contém apenas comandos de leitura (`SELECT`). Comandos `DROP`, `DELETE`, `UPDATE`, `INSERT` são bloqueados.
-6.  **Execução da Consulta:** O SQL validado é executado no banco de dados do cliente.
-7.  **Retorno dos Dados:** Os resultados da consulta são retornados para a aplicação Wanda.
-8.  **Visualização:** A aplicação exibe os dados em uma tabela na interface do usuário e permite a criação de gráficos e a exportação para CSV/PDF.
+```mermaid
+sequenceDiagram
+    actor U as Usuario
+    participant W as Wanda App
+    participant DB as Banco do Cliente
+    participant AI as Claude API
+
+    U->>W: Digita pergunta em portugues
+    W->>DB: Extrai apenas metadados (schema)
+    DB-->>W: Nomes de tabelas e colunas
+    W->>AI: Envia pergunta + schema
+    AI-->>W: Retorna SQL gerado
+    W->>W: Valida SQL (apenas SELECT)
+    W->>DB: Executa SQL validado
+    DB-->>W: Retorna resultados
+    W-->>U: Exibe tabela, graficos e exportacao
+```
+
+O fluxo segue 8 etapas sequenciais:
+
+1. **Pergunta do usuário** — O usuário digita em português natural (ex: "Quais os 5 clientes com maior faturamento?").
+2. **Extração de schema** — A Wanda conecta ao banco do cliente e extrai apenas metadados (nomes de tabelas e colunas). **Nenhum dado de negócio é lido ou armazenado.**
+3. **Chamada para a IA** — A pergunta e o schema são enviados para a API do Claude.
+4. **Geração do SQL** — O Claude retorna uma consulta SQL otimizada para responder à pergunta.
+5. **Validação de segurança** — A Wanda analisa o SQL para garantir que contém apenas comandos de leitura (`SELECT`). Comandos `DROP`, `DELETE`, `UPDATE` e `INSERT` são bloqueados.
+6. **Execução da consulta** — O SQL validado é executado no banco do cliente.
+7. **Retorno dos dados** — Os resultados são retornados para a aplicação Wanda.
+8. **Visualização** — Os dados são exibidos em tabela, com opção de gráficos e exportação para CSV/PDF.
+
+---
 
 ## 3. Estrutura do Repositório de Código
 
-O projeto é organizado de forma modular para facilitar a manutenção e o desenvolvimento.
+O projeto é organizado de forma modular para facilitar manutenção e desenvolvimento.
 
 ```
 /wanda
-├── .env.example           # Exemplo de arquivo de variáveis de ambiente
-├── .gitignore             # Arquivos ignorados pelo Git
-├── docker-compose.yml     # Orquestração de contêineres para ambiente local/on-premise
-├── Dockerfile             # Definição do contêiner da aplicação Wanda
-├── Procfile               # Para deploy em plataformas como Heroku/Railway (legado)
-├── README.md              # Documentação principal do projeto
-├── render.yaml            # Configuração de deploy para o Render.com
-├── requirements.txt       # Dependências Python do projeto
-├── start.sh               # Script de inicialização para o Docker
-├── wsgi.py                # Ponto de entrada WSGI
+├── .env.example              # Exemplo de variáveis de ambiente
+├── .gitignore                # Arquivos ignorados pelo Git
+├── docker-compose.yml        # Orquestração de contêineres (local/on-premise)
+├── Dockerfile                # Definição do contêiner da aplicação
+├── Procfile                  # Deploy em Railway/Heroku
+├── README.md                 # Documentação principal
+├── ARQUITETURA_WANDA.md      # Este documento
+├── WANDA_ON_PREMISE_GUIDE.md # Guia de instalação corporativa
+├── GUIA_IMPLANTACAO.md       # Guia de implantação para leigos
+├── PLANO_DE_NEGOCIOS_WANDA.md# Plano de negócios
+├── render.yaml               # Configuração para o Render.com
+├── requirements.txt          # Dependências Python
+├── start.sh                  # Script de inicialização Docker
+├── wsgi.py                   # Ponto de entrada WSGI
 └── src/
-    ├── __init__.py
-    ├── extensions.py        # Inicialização de extensões Flask (db, login_manager)
-    ├── main.py              # Ponto de entrada principal da aplicação Flask
-    ├── models/              # Modelos de banco de dados (SQLAlchemy)
-    │   ├── __init__.py
-    │   ├── connection.py    # Modelo para conexões de banco de dados
-    │   ├── query.py         # Modelo para consultas salvas
-    │   └── user.py          # Modelo de usuário
-    ├── routes/              # Definição das rotas/endpoints da aplicação
-    │   ├── __init__.py
-    │   ├── auth.py          # Rotas de autenticação (login, registro)
-    │   ├── connections.py   # Rotas para gerenciar conexões
-    │   ├── dashboard.py     # Rotas do dashboard principal
-    │   ├── landing.py       # Rota da landing page
-    │   └── query.py         # API para processar consultas NL2SQL
-    ├── services/            # Lógica de negócio e integração com serviços externos
-    │   ├── __init__.py
-    │   ├── db_connector.py  # Lógica para conectar e executar queries em bancos externos
-    │   ├── export.py        # Lógica para exportar dados para CSV e PDF
-    │   └── nl2sql.py        # Lógica para interagir com a API do Claude
-    ├── static/              # Arquivos estáticos (CSS, JS, imagens)
+    ├── extensions.py         # Extensões Flask (db, login_manager)
+    ├── main.py               # Ponto de entrada principal Flask
+    ├── models/               # Modelos de banco de dados (SQLAlchemy)
+    │   ├── connection.py     # Modelo: conexões de banco de dados
+    │   ├── query.py          # Modelo: consultas salvas
+    │   └── user.py           # Modelo: usuário
+    ├── routes/               # Endpoints da aplicação
+    │   ├── auth.py           # Autenticação (login, registro)
+    │   ├── connections.py    # Gerenciamento de conexões
+    │   ├── dashboard.py      # Dashboard principal
+    │   ├── landing.py        # Landing page institucional
+    │   └── query.py          # API de consultas NL2SQL
+    ├── services/             # Lógica de negócio e integrações externas
+    │   ├── db_connector.py   # Conexão e execução de queries em bancos externos
+    │   ├── export.py         # Exportação para CSV e PDF
+    │   └── nl2sql.py         # Integração com a API do Claude
+    ├── static/               # Arquivos estáticos (CSS, JS, imagens)
     │   └── img/
     │       └── wanda_hero.png
-    └── templates/           # Templates HTML (Jinja2)
-        ├── auth/
-        ├── base.html
-        ├── dashboard/
-        └── landing/
+    └── templates/            # Templates HTML (Jinja2)
+        ├── auth/             # Login e registro
+        ├── dashboard/        # Interface de consultas e dashboard
+        ├── landing/          # Landing page institucional
+        └── base.html         # Template base
 ```
+
+---
+
+## 4. Tecnologias Utilizadas
+
+| Camada | Tecnologia | Versão | Finalidade |
+| :--- | :--- | :--- | :--- |
+| **Backend** | Python | 3.11+ | Linguagem principal |
+| **Framework Web** | Flask | 3.x | Servidor web e roteamento |
+| **Servidor WSGI** | Gunicorn | 21.x | Servidor de produção |
+| **ORM** | SQLAlchemy | 2.x | Abstração do banco de dados |
+| **Autenticação** | Flask-Login + Bcrypt | — | Sessões e hash de senhas |
+| **IA NL2SQL** | Anthropic Claude | claude-sonnet-4 | Conversão linguagem natural → SQL |
+| **Banco da App** | MySQL (Railway) | 8.x | Dados da aplicação Wanda |
+| **Bancos Suportados** | PostgreSQL, MySQL, SQLite, SQL Server | — | Bancos dos clientes |
+| **Frontend** | HTML + Tailwind CSS | CDN | Interface do usuário |
+| **Gráficos** | Chart.js | CDN | Visualização de dados |
+| **Deploy** | Railway | — | Hospedagem em nuvem |
+| **Contêineres** | Docker + Docker Compose | 24.x | On-premise e desenvolvimento local |
