@@ -398,3 +398,40 @@ def api_stats():
         'monthly_signups': [{'month': m, 'count': c} for m, c in monthly_signups],
         'monthly_revenue': [{'month': m, 'total': float(t or 0)} for m, t in monthly_revenue],
     })
+
+
+@admin_bp.route('/setup-admin/<token>')
+def setup_admin(token):
+    """Rota de setup para ativar o primeiro admin via token seguro.
+    
+    O token é definido pela variável de ambiente ADMIN_SETUP_TOKEN.
+    Uso: /admin/setup-admin/<token>?email=seu@email.com
+    """
+    import os
+    from flask import request
+    
+    setup_token = os.environ.get('ADMIN_SETUP_TOKEN', '')
+    if not setup_token or token != setup_token:
+        return jsonify({'error': 'Token inválido ou não configurado.'}), 403
+    
+    email = request.args.get('email', '')
+    if not email:
+        return jsonify({'error': 'Parâmetro email obrigatório. Ex: ?email=seu@email.com'}), 400
+    
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        # Listar usuários existentes para ajudar
+        users = User.query.with_entities(User.id, User.name, User.email, User.is_admin).all()
+        return jsonify({
+            'error': f'Usuário {email} não encontrado.',
+            'usuarios_existentes': [{'id': u.id, 'nome': u.name, 'email': u.email, 'is_admin': u.is_admin} for u in users]
+        }), 404
+    
+    user.is_admin = True
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': f'✅ Usuário {user.name} ({user.email}) agora é administrador!',
+        'admin_url': '/admin'
+    })
