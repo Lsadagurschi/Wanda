@@ -1,0 +1,253 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Departamentos{% endblock %}
+{% block page_title %}Departamentos / Áreas{% endblock %}
+{% block page_subtitle %}Gerencie as áreas de acesso dos usuários{% endblock %}
+
+{% block header_actions %}
+<button onclick="document.getElementById('createDeptModal').classList.remove('hidden')"
+    class="bg-wanda-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-wanda-700 transition-colors">
+    + Novo Departamento
+</button>
+{% endblock %}
+
+{% block content %}
+
+<!-- Informativo -->
+<div class="bg-wanda-50 border border-wanda-200 rounded-xl p-4 mb-5 flex gap-3">
+    <svg class="w-5 h-5 text-wanda-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <div class="text-sm text-wanda-800">
+        <p class="font-semibold">Como funcionam os Departamentos?</p>
+        <p class="mt-0.5 text-wanda-700">Cada departamento representa uma área da empresa (ex: TI, Marketing, Vendas). Ao vincular um usuário a um departamento, você organiza o acesso e facilita a segmentação de relatórios e permissões futuras.</p>
+    </div>
+</div>
+
+<!-- Grid de departamentos -->
+{% if departments %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+    {% set color_classes = {
+        'purple': 'bg-purple-100 text-purple-700 border-purple-200',
+        'blue': 'bg-blue-100 text-blue-700 border-blue-200',
+        'green': 'bg-green-100 text-green-700 border-green-200',
+        'orange': 'bg-orange-100 text-orange-700 border-orange-200',
+        'red': 'bg-red-100 text-red-700 border-red-200',
+        'indigo': 'bg-indigo-100 text-indigo-700 border-indigo-200',
+        'yellow': 'bg-yellow-100 text-yellow-700 border-yellow-200',
+        'gray': 'bg-gray-100 text-gray-700 border-gray-200'
+    } %}
+    {% set icon_svgs = {
+        'briefcase': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>',
+        'chip': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/>',
+        'chart-bar': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>',
+        'users': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>',
+        'currency': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+        'cog': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>'
+    } %}
+    {% for dept in departments %}
+    <div class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center {{ color_classes.get(dept.color, color_classes['gray']) }} border">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        {{ icon_svgs.get(dept.icon, icon_svgs['briefcase']) | safe }}
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-900 text-sm">{{ dept.name }}</h3>
+                    <p class="text-xs text-gray-500">{{ counts.get(dept.id, 0) }} usuário(s)</p>
+                </div>
+            </div>
+            <span class="badge {% if dept.is_active %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-500{% endif %}">
+                {% if dept.is_active %}Ativo{% else %}Inativo{% endif %}
+            </span>
+        </div>
+        {% if dept.description %}
+        <p class="text-xs text-gray-500 mb-3">{{ dept.description }}</p>
+        {% endif %}
+        <div class="flex gap-2 pt-2 border-t border-gray-100">
+            <button onclick="openEditDept({{ dept.id }}, '{{ dept.name }}', '{{ dept.description or '' }}', '{{ dept.icon }}', '{{ dept.color }}', {{ 'true' if dept.is_active else 'false' }})"
+                class="flex-1 text-xs text-wanda-600 hover:text-wanda-700 font-medium py-1.5 rounded-lg hover:bg-wanda-50 transition-colors">
+                Editar
+            </button>
+            <form method="POST" action="{{ url_for('admin.department_delete', dept_id=dept.id) }}"
+                onsubmit="return confirm('Tem certeza que deseja excluir o departamento {{ dept.name }}?')"
+                class="flex-1">
+                <button type="submit" class="w-full text-xs text-red-500 hover:text-red-600 font-medium py-1.5 rounded-lg hover:bg-red-50 transition-colors">
+                    Excluir
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="bg-white rounded-xl border border-gray-100 p-12 shadow-sm text-center">
+    <div class="w-16 h-16 bg-wanda-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-wanda-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+        </svg>
+    </div>
+    <h3 class="font-bold text-gray-900 mb-2">Nenhum departamento criado</h3>
+    <p class="text-sm text-gray-500 mb-4">Crie departamentos para organizar os usuários por área (TI, Marketing, Vendas, etc.)</p>
+    <button onclick="document.getElementById('createDeptModal').classList.remove('hidden')"
+        class="bg-wanda-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-wanda-700 transition-colors">
+        Criar Primeiro Departamento
+    </button>
+</div>
+{% endif %}
+
+<!-- Sugestões de departamentos comuns -->
+<div class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+    <h3 class="text-sm font-bold text-gray-900 mb-3">Departamentos Sugeridos</h3>
+    <p class="text-xs text-gray-500 mb-3">Clique para criar rapidamente:</p>
+    <div class="flex flex-wrap gap-2">
+        {% set suggestions = [
+            ('Tecnologia da Informação', 'chip', 'blue'),
+            ('Marketing', 'chart-bar', 'orange'),
+            ('Vendas', 'currency', 'green'),
+            ('Recursos Humanos', 'users', 'purple'),
+            ('Financeiro', 'briefcase', 'indigo'),
+            ('Operações', 'cog', 'gray')
+        ] %}
+        {% for name, icon, color in suggestions %}
+        <form method="POST" action="{{ url_for('admin.department_create') }}" class="inline">
+            <input type="hidden" name="name" value="{{ name }}">
+            <input type="hidden" name="icon" value="{{ icon }}">
+            <input type="hidden" name="color" value="{{ color }}">
+            <button type="submit" class="px-3 py-1.5 text-xs border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-wanda-300 transition-colors text-gray-700">
+                + {{ name }}
+            </button>
+        </form>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal: Criar Departamento -->
+<div id="createDeptModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
+        <h3 class="text-base font-bold text-gray-900 mb-4">Novo Departamento</h3>
+        <form method="POST" action="{{ url_for('admin.department_create') }}" class="space-y-3">
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Nome *</label>
+                <input type="text" name="name" required placeholder="Ex: Tecnologia da Informação"
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Descrição</label>
+                <textarea name="description" rows="2" placeholder="Descreva o departamento..."
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500 resize-none"></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Ícone</label>
+                    <select name="icon" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+                        <option value="briefcase">Pasta</option>
+                        <option value="chip">Tecnologia</option>
+                        <option value="chart-bar">Gráfico</option>
+                        <option value="users">Pessoas</option>
+                        <option value="currency">Financeiro</option>
+                        <option value="cog">Operações</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Cor</label>
+                    <select name="color" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+                        <option value="purple">Roxo</option>
+                        <option value="blue">Azul</option>
+                        <option value="green">Verde</option>
+                        <option value="orange">Laranja</option>
+                        <option value="red">Vermelho</option>
+                        <option value="indigo">Índigo</option>
+                        <option value="yellow">Amarelo</option>
+                        <option value="gray">Cinza</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="document.getElementById('createDeptModal').classList.add('hidden')"
+                    class="flex-1 border border-gray-200 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-50">
+                    Cancelar
+                </button>
+                <button type="submit" class="flex-1 bg-wanda-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-wanda-700">
+                    Criar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Editar Departamento -->
+<div id="editDeptModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
+        <h3 class="text-base font-bold text-gray-900 mb-4">Editar Departamento</h3>
+        <form id="editDeptForm" method="POST" class="space-y-3">
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Nome *</label>
+                <input type="text" id="editName" name="name" required
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Descrição</label>
+                <textarea id="editDesc" name="description" rows="2"
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500 resize-none"></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Ícone</label>
+                    <select id="editIcon" name="icon" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+                        <option value="briefcase">Pasta</option>
+                        <option value="chip">Tecnologia</option>
+                        <option value="chart-bar">Gráfico</option>
+                        <option value="users">Pessoas</option>
+                        <option value="currency">Financeiro</option>
+                        <option value="cog">Operações</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Cor</label>
+                    <select id="editColor" name="color" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+                        <option value="purple">Roxo</option>
+                        <option value="blue">Azul</option>
+                        <option value="green">Verde</option>
+                        <option value="orange">Laranja</option>
+                        <option value="red">Vermelho</option>
+                        <option value="indigo">Índigo</option>
+                        <option value="yellow">Amarelo</option>
+                        <option value="gray">Cinza</option>
+                    </select>
+                </div>
+            </div>
+            <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                <input type="checkbox" id="editActive" name="is_active" class="rounded">
+                Departamento ativo
+            </label>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="document.getElementById('editDeptModal').classList.add('hidden')"
+                    class="flex-1 border border-gray-200 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-50">
+                    Cancelar
+                </button>
+                <button type="submit" class="flex-1 bg-wanda-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-wanda-700">
+                    Salvar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openEditDept(id, name, desc, icon, color, isActive) {
+    document.getElementById('editDeptForm').action = `/admin/departments/${id}/edit`;
+    document.getElementById('editName').value = name;
+    document.getElementById('editDesc').value = desc;
+    document.getElementById('editIcon').value = icon;
+    document.getElementById('editColor').value = color;
+    document.getElementById('editActive').checked = isActive;
+    document.getElementById('editDeptModal').classList.remove('hidden');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,301 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}{{ user.name }}{% endblock %}
+{% block page_title %}{{ user.name }}{% endblock %}
+{% block page_subtitle %}{{ user.email }} · Cadastrado em {{ user.created_at.strftime('%d/%m/%Y') }}{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('admin.users') }}" class="text-sm text-gray-500 hover:text-gray-700">← Voltar</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Coluna esquerda: perfil + edição -->
+    <div class="space-y-5">
+
+        <!-- Card de perfil -->
+        <div class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold
+                    {% if user.is_admin %}bg-yellow-100 text-yellow-700{% else %}bg-wanda-100 text-wanda-700{% endif %}">
+                    {{ user.name[0].upper() }}
+                </div>
+                <div>
+                    <h2 class="font-bold text-gray-900">{{ user.name }}</h2>
+                    <p class="text-sm text-gray-500">{{ user.email }}</p>
+                    <div class="flex gap-1 mt-1">
+                        <span class="badge
+                            {% if user.plan == 'free' %}bg-gray-100 text-gray-700
+                            {% elif user.plan == 'starter' %}bg-blue-100 text-blue-700
+                            {% elif user.plan == 'pro' %}bg-purple-100 text-purple-700
+                            {% elif user.plan == 'business' %}bg-indigo-100 text-indigo-700
+                            {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                            {{ user.plan_display }}
+                        </span>
+                        {% if user.is_admin %}<span class="badge bg-yellow-100 text-yellow-700">Admin</span>{% endif %}
+                        <span class="badge {% if user.is_active %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+                            {% if user.is_active %}Ativo{% else %}Inativo{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-2 text-sm border-t border-gray-100 pt-4">
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Empresa</span>
+                    <span class="font-medium text-gray-900">{{ user.company or '—' }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Profissão</span>
+                    <span class="font-medium text-gray-900">{{ user.profession or '—' }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Departamento</span>
+                    <span class="font-medium text-gray-900">{{ user.department.name if user.department else '—' }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Conexões</span>
+                    <span class="font-medium text-gray-900">{{ connections|length }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Consultas</span>
+                    <span class="font-medium text-gray-900">{{ queries|length }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Último login</span>
+                    <span class="font-medium text-gray-900">{{ user.last_login.strftime('%d/%m/%Y %H:%M') if user.last_login else '—' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulário de edição -->
+        <div class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+            <h3 class="text-sm font-bold text-gray-900 mb-4">Editar Usuário</h3>
+            <form method="POST" action="{{ url_for('admin.user_edit', user_id=user.id) }}" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nome</label>
+                    <input type="text" name="name" value="{{ user.name }}"
+                        class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">E-mail</label>
+                    <input type="email" name="email" value="{{ user.email }}"
+                        class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Empresa</label>
+                    <input type="text" name="company" value="{{ user.company or '' }}"
+                        class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Profissão</label>
+                    <input type="text" name="profession" value="{{ user.profession or '' }}"
+                        class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Plano</label>
+                    <select name="plan" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+                        {% for p in ['free', 'starter', 'pro', 'business', 'enterprise'] %}
+                        <option value="{{ p }}" {% if user.plan == p %}selected{% endif %}>
+                            {{ {'free':'Gratuito','starter':'Starter','pro':'Pro','business':'Business','enterprise':'Enterprise'}[p] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Departamento</label>
+                    <select name="department_id" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+                        <option value="">Nenhum</option>
+                        {% for dept in departments %}
+                        <option value="{{ dept.id }}" {% if user.department_id == dept.id %}selected{% endif %}>{{ dept.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="flex gap-4 pt-1">
+                    <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                        <input type="checkbox" name="is_active" {% if user.is_active %}checked{% endif %} class="rounded">
+                        Ativo
+                    </label>
+                    <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                        <input type="checkbox" name="is_admin" {% if user.is_admin %}checked{% endif %} class="rounded">
+                        Administrador
+                    </label>
+                </div>
+                <button type="submit" class="w-full bg-wanda-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-wanda-700 transition-colors">
+                    Salvar Alterações
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Coluna direita: assinaturas, pagamentos, consultas -->
+    <div class="lg:col-span-2 space-y-5">
+
+        <!-- Assinaturas -->
+        <div class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-bold text-gray-900">Assinaturas</h3>
+                <button onclick="document.getElementById('addSubModal').classList.remove('hidden')"
+                    class="text-xs bg-wanda-600 text-white px-3 py-1.5 rounded-lg hover:bg-wanda-700 transition-colors">
+                    + Adicionar
+                </button>
+            </div>
+            {% if subscriptions %}
+            <div class="space-y-3">
+                {% for sub in subscriptions %}
+                <div class="flex items-center justify-between p-3 rounded-lg border {% if sub.is_active %}border-wanda-200 bg-wanda-50{% else %}border-gray-100 bg-gray-50{% endif %}">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-semibold text-sm text-gray-900">
+                                {{ {'free':'Gratuito','starter':'Starter','pro':'Pro','business':'Business','enterprise':'Enterprise'}.get(sub.plan, sub.plan) }}
+                            </span>
+                            <span class="badge {% if sub.status == 'active' %}bg-green-100 text-green-700{% elif sub.status == 'cancelled' %}bg-red-100 text-red-700{% else %}bg-gray-100 text-gray-600{% endif %}">
+                                {{ {'active':'Ativo','cancelled':'Cancelado','expired':'Expirado','trial':'Trial'}.get(sub.status, sub.status) }}
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-0.5">
+                            {{ sub.start_date.strftime('%d/%m/%Y') }}
+                            {% if sub.end_date %} → {{ sub.end_date.strftime('%d/%m/%Y') }}
+                            {% if sub.days_remaining is not none %}
+                                <span class="{% if sub.days_remaining < 7 %}text-red-500{% else %}text-gray-400{% endif %}">
+                                    ({{ sub.days_remaining }} dias restantes)
+                                </span>
+                            {% endif %}
+                            {% else %} · Sem vencimento{% endif %}
+                        </p>
+                        {% if sub.notes %}<p class="text-xs text-gray-400 mt-0.5 italic">{{ sub.notes }}</p>{% endif %}
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-gray-900">R$ {{ "%.2f"|format(sub.price) }}</p>
+                        <p class="text-xs text-gray-400">{{ 'Mensal' if sub.billing_cycle == 'monthly' else 'Anual' }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-sm text-gray-400">Nenhuma assinatura registrada.</p>
+            {% endif %}
+        </div>
+
+        <!-- Histórico de pagamentos -->
+        <div class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+            <h3 class="text-sm font-bold text-gray-900 mb-4">Histórico de Pagamentos</h3>
+            {% if payments %}
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-xs text-gray-500 border-b border-gray-100">
+                            <th class="pb-2 font-semibold">Data</th>
+                            <th class="pb-2 font-semibold">Valor</th>
+                            <th class="pb-2 font-semibold">Método</th>
+                            <th class="pb-2 font-semibold">Descrição</th>
+                            <th class="pb-2 font-semibold">Status</th>
+                            <th class="pb-2 font-semibold">ID Transação</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        {% for p in payments %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-2.5 text-gray-500">{{ p.created_at.strftime('%d/%m/%Y') }}</td>
+                            <td class="py-2.5 font-bold text-gray-900">R$ {{ "%.2f"|format(p.amount) }}</td>
+                            <td class="py-2.5 text-gray-600 capitalize">{{ p.payment_method or '—' }}</td>
+                            <td class="py-2.5 text-gray-600">{{ p.description or '—' }}</td>
+                            <td class="py-2.5">
+                                <span class="badge
+                                    {% if p.status == 'paid' %}bg-green-100 text-green-700
+                                    {% elif p.status == 'pending' %}bg-yellow-100 text-yellow-700
+                                    {% elif p.status == 'failed' %}bg-red-100 text-red-700
+                                    {% else %}bg-gray-100 text-gray-700{% endif %}">
+                                    {{ p.status_display }}
+                                </span>
+                            </td>
+                            <td class="py-2.5 text-xs text-gray-400 font-mono">{{ p.transaction_id or '—' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-sm text-gray-400">Nenhum pagamento registrado.</p>
+            {% endif %}
+        </div>
+
+        <!-- Últimas consultas -->
+        <div class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+            <h3 class="text-sm font-bold text-gray-900 mb-4">Últimas Consultas ({{ queries|length }})</h3>
+            {% if queries %}
+            <div class="space-y-2">
+                {% for q in queries[:10] %}
+                <div class="p-3 bg-gray-50 rounded-lg">
+                    <p class="text-sm text-gray-800 font-medium">{{ q.question }}</p>
+                    <p class="text-xs text-gray-400 mt-0.5">{{ q.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-sm text-gray-400">Nenhuma consulta realizada.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Adicionar Assinatura -->
+<div id="addSubModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
+        <h3 class="text-base font-bold text-gray-900 mb-4">Adicionar Assinatura</h3>
+        <form method="POST" action="{{ url_for('admin.add_subscription', user_id=user.id) }}" class="space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Plano</label>
+                    <select name="plan" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+                        {% for p in ['free', 'starter', 'pro', 'business', 'enterprise'] %}
+                        <option value="{{ p }}">{{ {'free':'Gratuito','starter':'Starter','pro':'Pro','business':'Business','enterprise':'Enterprise'}[p] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Ciclo</label>
+                    <select name="billing_cycle" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+                        <option value="monthly">Mensal</option>
+                        <option value="annual">Anual</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Valor (R$)</label>
+                <input type="number" name="price" step="0.01" min="0" placeholder="0.00"
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Data Início</label>
+                    <input type="date" name="start_date" value="{{ now.strftime('%Y-%m-%d') if now else '' }}"
+                        class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Data Fim</label>
+                    <input type="date" name="end_date"
+                        class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Observações</label>
+                <textarea name="notes" rows="2" placeholder="Ex: Migração de plano, desconto especial..."
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500 resize-none"></textarea>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="document.getElementById('addSubModal').classList.add('hidden')"
+                    class="flex-1 border border-gray-200 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-50">
+                    Cancelar
+                </button>
+                <button type="submit" class="flex-1 bg-wanda-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-wanda-700">
+                    Salvar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

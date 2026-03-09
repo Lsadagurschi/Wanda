@@ -60,12 +60,14 @@ def create_app():
     from src.routes.dashboard import dashboard_bp
     from src.routes.connections import connections_bp
     from src.routes.query import query_bp
+    from src.routes.admin import admin_bp
 
     app.register_blueprint(landing_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(connections_bp)
     app.register_blueprint(query_bp)
+    app.register_blueprint(admin_bp)
 
     # Criar tabelas (checkfirst=True evita erro se tabelas já existem)
     with app.app_context():

@@ -1,0 +1,184 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Pagamentos{% endblock %}
+{% block page_title %}Histórico de Pagamentos{% endblock %}
+{% block page_subtitle %}{{ payments.total }} registro(s) encontrado(s){% endblock %}
+
+{% block header_actions %}
+<button onclick="document.getElementById('addPayModal').classList.remove('hidden')"
+    class="bg-wanda-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-wanda-700 transition-colors">
+    + Registrar Pagamento
+</button>
+{% endblock %}
+
+{% block content %}
+
+<!-- Totais por status -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+    {% set status_map = {'paid': ('Pagos', 'green'), 'pending': ('Pendentes', 'yellow'), 'failed': ('Falhos', 'red'), 'refunded': ('Reembolsados', 'gray')} %}
+    {% for status, total, count in totals %}
+    {% set label, color = status_map.get(status, (status.capitalize(), 'gray')) %}
+    <div class="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{{ label }}</p>
+        <p class="text-xl font-bold text-gray-900">R$ {{ "%.2f"|format(total or 0) }}</p>
+        <p class="text-xs text-gray-400">{{ count }} transação(ões)</p>
+    </div>
+    {% else %}
+    <div class="col-span-4 text-center text-sm text-gray-400 py-4">Nenhum pagamento registrado ainda.</div>
+    {% endfor %}
+</div>
+
+<!-- Filtros -->
+<div class="bg-white rounded-xl border border-gray-100 p-4 mb-5 shadow-sm">
+    <form method="GET" class="flex flex-wrap gap-3 items-end">
+        <div class="flex-1 min-w-48">
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Buscar usuário</label>
+            <input type="text" name="search" value="{{ search }}" placeholder="Nome ou e-mail..."
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Status</label>
+            <select name="status" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+                <option value="">Todos</option>
+                <option value="paid" {% if status_filter == 'paid' %}selected{% endif %}>Pago</option>
+                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pendente</option>
+                <option value="failed" {% if status_filter == 'failed' %}selected{% endif %}>Falhou</option>
+                <option value="refunded" {% if status_filter == 'refunded' %}selected{% endif %}>Reembolsado</option>
+            </select>
+        </div>
+        <button type="submit" class="bg-wanda-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-wanda-700 transition-colors">
+            Filtrar
+        </button>
+    </form>
+</div>
+
+<!-- Tabela de pagamentos -->
+<div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b border-gray-100">
+                <tr class="text-left text-xs text-gray-500 font-semibold uppercase tracking-wider">
+                    <th class="px-4 py-3">Usuário</th>
+                    <th class="px-4 py-3">Valor</th>
+                    <th class="px-4 py-3">Método</th>
+                    <th class="px-4 py-3">Descrição</th>
+                    <th class="px-4 py-3">Status</th>
+                    <th class="px-4 py-3">Data Pagamento</th>
+                    <th class="px-4 py-3">ID Transação</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                {% for p in payments.items %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-4 py-3">
+                        <a href="{{ url_for('admin.user_detail', user_id=p.user_id) }}" class="text-wanda-600 hover:underline font-medium">
+                            {{ p.user.name }}
+                        </a>
+                        <p class="text-xs text-gray-400">{{ p.user.email }}</p>
+                    </td>
+                    <td class="px-4 py-3 font-bold text-gray-900">R$ {{ "%.2f"|format(p.amount) }}</td>
+                    <td class="px-4 py-3 text-gray-600 capitalize">{{ p.payment_method or '—' }}</td>
+                    <td class="px-4 py-3 text-gray-600 max-w-xs truncate">{{ p.description or '—' }}</td>
+                    <td class="px-4 py-3">
+                        <span class="badge
+                            {% if p.status == 'paid' %}bg-green-100 text-green-700
+                            {% elif p.status == 'pending' %}bg-yellow-100 text-yellow-700
+                            {% elif p.status == 'failed' %}bg-red-100 text-red-700
+                            {% else %}bg-gray-100 text-gray-700{% endif %}">
+                            {{ p.status_display }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-gray-500">
+                        {{ p.paid_at.strftime('%d/%m/%Y %H:%M') if p.paid_at else '—' }}
+                    </td>
+                    <td class="px-4 py-3 text-xs text-gray-400 font-mono">{{ p.transaction_id or '—' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="px-4 py-8 text-center text-gray-400 text-sm">
+                        Nenhum pagamento encontrado.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginação -->
+    {% if payments.pages > 1 %}
+    <div class="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
+        <p class="text-xs text-gray-500">Mostrando {{ payments.items|length }} de {{ payments.total }}</p>
+        <div class="flex gap-1">
+            {% if payments.has_prev %}
+            <a href="{{ url_for('admin.payments', page=payments.prev_num, status=status_filter, search=search) }}"
+                class="px-3 py-1.5 text-xs border border-gray-200 rounded-lg hover:bg-gray-50">← Anterior</a>
+            {% endif %}
+            {% if payments.has_next %}
+            <a href="{{ url_for('admin.payments', page=payments.next_num, status=status_filter, search=search) }}"
+                class="px-3 py-1.5 text-xs border border-gray-200 rounded-lg hover:bg-gray-50">Próxima →</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal: Registrar Pagamento -->
+<div id="addPayModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
+        <h3 class="text-base font-bold text-gray-900 mb-4">Registrar Pagamento Manual</h3>
+        <form method="POST" action="{{ url_for('admin.add_payment') }}" class="space-y-3">
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">ID do Usuário</label>
+                <input type="number" name="user_id" placeholder="ID numérico do usuário" required
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Valor (R$)</label>
+                    <input type="number" name="amount" step="0.01" min="0" placeholder="0.00" required
+                        class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Status</label>
+                    <select name="status" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+                        <option value="paid">Pago</option>
+                        <option value="pending">Pendente</option>
+                        <option value="failed">Falhou</option>
+                        <option value="refunded">Reembolsado</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Método de Pagamento</label>
+                <select name="payment_method" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+                    <option value="pix">PIX</option>
+                    <option value="credit_card">Cartão de Crédito</option>
+                    <option value="boleto">Boleto</option>
+                    <option value="transfer">Transferência</option>
+                    <option value="manual">Manual</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Descrição</label>
+                <input type="text" name="description" placeholder="Ex: Assinatura Pro - Março/2026"
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">ID da Transação</label>
+                <input type="text" name="transaction_id" placeholder="Ex: PAY-123456"
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wanda-500">
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="document.getElementById('addPayModal').classList.add('hidden')"
+                    class="flex-1 border border-gray-200 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-50">
+                    Cancelar
+                </button>
+                <button type="submit" class="flex-1 bg-wanda-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-wanda-700">
+                    Registrar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

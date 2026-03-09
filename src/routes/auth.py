@@ -20,6 +20,9 @@ def login():
         user = User.query.filter_by(email=email).first()
 
         if user and user.check_password(password):
+            from datetime import datetime
+            user.last_login = datetime.utcnow()
+            db.session.commit()
             login_user(user, remember=remember)
             if request.is_json:
                 return jsonify({'success': True, 'redirect': url_for('dashboard.index')})
@@ -44,9 +47,19 @@ def register():
         email = data.get('email', '').strip().lower()
         password = data.get('password', '')
         plan = data.get('plan', 'free')
+        company = data.get('company', '').strip()
+        area = data.get('area', '').strip()
+        profession = data.get('profession', '').strip()
 
         if not name or not email or not password:
             msg = 'Preencha todos os campos obrigatórios.'
+            if request.is_json:
+                return jsonify({'success': False, 'error': msg}), 400
+            flash(msg, 'error')
+            return render_template('auth/register.html')
+
+        if not company:
+            msg = 'O nome da empresa é obrigatório.'
             if request.is_json:
                 return jsonify({'success': False, 'error': msg}), 400
             flash(msg, 'error')
@@ -66,7 +79,14 @@ def register():
             flash(msg, 'error')
             return render_template('auth/register.html')
 
-        user = User(name=name, email=email, plan=plan)
+        user = User(
+            name=name,
+            email=email,
+            plan=plan,
+            company=company,
+            area=area,
+            profession=profession
+        )
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
