@@ -1,25 +1,82 @@
 {% extends "base.html" %}
-{% block title %}Wanda — Transforme Perguntas em Dados{% endblock %}
+{% block title %}Wanda — Inteligência de Dados em Português{% endblock %}
+
+{% block extra_head %}
+<style>
+  body { background: #0a0014; }
+  .gradient-hero {
+    background: linear-gradient(135deg, #0a0014 0%, #1a0533 30%, #2d1065 60%, #4c1d95 100%);
+  }
+  .gradient-card {
+    background: linear-gradient(135deg, rgba(109,40,217,0.12) 0%, rgba(76,29,149,0.06) 100%);
+  }
+  .gradient-text-purple {
+    background: linear-gradient(135deg, #c4b5fd, #a78bfa, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .glow-purple { box-shadow: 0 0 40px rgba(139,92,246,0.25), 0 0 80px rgba(109,40,217,0.12); }
+  .glow-btn {
+    box-shadow: 0 4px 24px rgba(139,92,246,0.5);
+    transition: all 0.3s ease;
+  }
+  .glow-btn:hover { box-shadow: 0 8px 40px rgba(139,92,246,0.7); transform: translateY(-2px); }
+  .card-hover { transition: all 0.3s ease; }
+  .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(109,40,217,0.18); }
+  .security-badge {
+    background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(5,150,105,0.06));
+    border: 1px solid rgba(16,185,129,0.25);
+  }
+  .plan-popular {
+    background: linear-gradient(135deg, #5b21b6, #3b0764);
+    border: 2px solid #a78bfa;
+  }
+  .plan-enterprise {
+    background: linear-gradient(135deg, #0f0020, #1e0845);
+    border: 2px solid #6d28d9;
+  }
+  .nav-blur {
+    backdrop-filter: blur(20px);
+    background: rgba(10, 0, 20, 0.85);
+  }
+  .hero-glow { filter: drop-shadow(0 0 50px rgba(139,92,246,0.45)); }
+  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+  .float-anim { animation: float 5s ease-in-out infinite; }
+  .section-divider { background: linear-gradient(90deg, transparent, rgba(139,92,246,0.35), transparent); height: 1px; }
+  .stat-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(139,92,246,0.18); }
+  .bg-dark-section { background: #0a0014; }
+  .bg-dark-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); }
+  .text-muted { color: #9ca3af; }
+  .badge-new {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #000;
+  }
+  .badge-enterprise {
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    color: #fff;
+  }
+</style>
+{% endblock %}
 
 {% block body %}
+
 <!-- NAVBAR -->
-<nav class="fixed top-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
+<nav class="fixed top-0 left-0 right-0 z-50 nav-blur border-b border-white/5">
   <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-    <a href="/" class="flex items-center gap-2">
-      <div class="w-9 h-9 gradient-wanda rounded-xl flex items-center justify-center shadow-md">
-        <span class="text-white font-bold text-lg">W</span>
-      </div>
-      <span class="text-xl font-bold gradient-text">Wanda</span>
+    <a href="/" class="flex items-center gap-3">
+      <div class="w-9 h-9 bg-gradient-to-br from-purple-500 to-purple-800 rounded-xl flex items-center justify-center font-black text-white text-lg shadow-lg">W</div>
+      <span class="text-xl font-bold text-white">Wanda</span>
     </a>
-    <div class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
-      <a href="#features" class="hover:text-wanda-600 transition-colors">Funcionalidades</a>
-      <a href="#how-it-works" class="hover:text-wanda-600 transition-colors">Como Funciona</a>
-      <a href="#pricing" class="hover:text-wanda-600 transition-colors">Planos</a>
-      <a href="#testimonials" class="hover:text-wanda-600 transition-colors">Depoimentos</a>
+    <div class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
+      <a href="#como-funciona" class="hover:text-purple-300 transition-colors">Como Funciona</a>
+      <a href="#seguranca" class="hover:text-purple-300 transition-colors">Segurança</a>
+      <a href="#planos" class="hover:text-purple-300 transition-colors">Planos</a>
+      <a href="#enterprise" class="hover:text-purple-300 transition-colors">Enterprise</a>
     </div>
     <div class="flex items-center gap-3">
-      <a href="/login" class="text-sm font-medium text-gray-600 hover:text-wanda-600 transition-colors px-4 py-2">Entrar</a>
-      <a href="/register" class="gradient-wanda text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity shadow-md">
+      <a href="{{ url_for('auth.login') }}" class="text-sm font-medium text-gray-400 hover:text-white transition-colors px-4 py-2">Entrar</a>
+      <a href="{{ url_for('auth.register') }}" class="glow-btn bg-gradient-to-r from-purple-600 to-purple-500 text-white text-sm font-bold px-5 py-2.5 rounded-xl">
         Começar Grátis
       </a>
     </div>
@@ -27,215 +84,395 @@
 </nav>
 
 <!-- HERO -->
-<section class="pt-32 pb-20 px-6 overflow-hidden" style="background: linear-gradient(180deg, #f3f0ff 0%, #ffffff 100%);">
-  <div class="max-w-7xl mx-auto">
-    <div class="text-center max-w-4xl mx-auto">
-      <div class="inline-flex items-center gap-2 bg-wanda-50 border border-wanda-200 text-wanda-700 text-sm font-medium px-4 py-2 rounded-full mb-6">
-        <span class="w-2 h-2 bg-wanda-500 rounded-full pulse-dot"></span>
-        Powered by Claude AI (Anthropic)
+<section class="gradient-hero min-h-screen flex items-center relative overflow-hidden pt-20">
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-700/15 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-1/3 right-1/4 w-80 h-80 bg-purple-900/15 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-purple-800/8 rounded-full blur-3xl"></div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-6 py-20 grid lg:grid-cols-2 gap-16 items-center relative z-10">
+    <!-- Left: Text -->
+    <div class="space-y-8">
+      <div class="inline-flex items-center gap-2 bg-purple-950/60 border border-purple-700/40 rounded-full px-4 py-2 text-sm text-purple-300 font-medium">
+        <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+        Powered by Claude AI · Anthropic
       </div>
-      <h1 class="text-5xl md:text-7xl font-extrabold text-gray-900 leading-tight mb-6">
-        Pergunte em<br>
-        <span class="gradient-text">português.</span><br>
-        Obtenha dados.
+
+      <h1 class="text-5xl lg:text-6xl font-black leading-tight">
+        <span class="text-white">Inteligência de</span><br>
+        <span class="gradient-text-purple">dados em português</span>
       </h1>
-      <p class="text-xl text-gray-500 mb-10 max-w-2xl mx-auto leading-relaxed">
-        A Wanda transforma perguntas em linguagem natural em consultas SQL precisas. Conecte seu banco de dados e comece a extrair insights sem escrever uma linha de código.
+
+      <p class="text-xl text-gray-300 leading-relaxed max-w-lg">
+        Conecte seu banco de dados e faça perguntas em português. O Wanda transforma linguagem natural em SQL com IA — sem código, sem complexidade, resultados instantâneos.
       </p>
-      <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <a href="/register" class="gradient-wanda text-white font-bold px-8 py-4 rounded-2xl text-lg hover:opacity-90 transition-all shadow-xl hover:shadow-wanda-500/30 hover:-translate-y-1">
-          Experimentar Gratuitamente →
+
+      <div class="flex flex-col sm:flex-row gap-4">
+        <a href="{{ url_for('auth.register') }}" class="glow-btn bg-gradient-to-r from-purple-600 to-purple-500 text-white font-bold px-8 py-4 rounded-2xl text-lg text-center">
+          Começar Grátis →
         </a>
-        <a href="#how-it-works" class="bg-white border-2 border-gray-200 text-gray-700 font-semibold px-8 py-4 rounded-2xl text-lg hover:border-wanda-300 transition-all">
-          Ver como funciona
+        <a href="#como-funciona" class="flex items-center justify-center gap-2 border border-purple-600/40 text-purple-300 font-semibold px-8 py-4 rounded-2xl text-lg hover:bg-purple-900/30 transition-all">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Ver demonstração
         </a>
       </div>
-      <p class="text-sm text-gray-400 mt-4">Sem cartão de crédito • 14 dias grátis no plano Pro</p>
+
+      <div class="grid grid-cols-3 gap-4 pt-2">
+        <div class="stat-card rounded-2xl p-4 text-center">
+          <div class="text-2xl font-black gradient-text-purple">90%+</div>
+          <div class="text-xs text-gray-500 mt-1">Precisão do SQL</div>
+        </div>
+        <div class="stat-card rounded-2xl p-4 text-center">
+          <div class="text-2xl font-black gradient-text-purple">&lt;2s</div>
+          <div class="text-xs text-gray-500 mt-1">Tempo de resposta</div>
+        </div>
+        <div class="stat-card rounded-2xl p-4 text-center">
+          <div class="text-2xl font-black gradient-text-purple">5+</div>
+          <div class="text-xs text-gray-500 mt-1">Bancos suportados</div>
+        </div>
+      </div>
     </div>
 
-    <!-- Demo Card -->
-    <div class="mt-16 max-w-3xl mx-auto">
-      <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
-        <div class="bg-gray-800 px-6 py-3 flex items-center gap-2">
-          <div class="w-3 h-3 rounded-full bg-red-400"></div>
-          <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
-          <div class="w-3 h-3 rounded-full bg-green-400"></div>
-          <span class="ml-3 text-gray-400 text-sm">Wanda — Interface de Consulta</span>
-        </div>
-        <div class="p-6">
-          <div class="bg-wanda-50 border border-wanda-200 rounded-2xl p-4 mb-4">
-            <p class="text-sm text-gray-500 mb-1">Sua pergunta:</p>
-            <p class="text-gray-800 font-medium">"Quais foram os 5 produtos mais vendidos no último trimestre, com o total de receita de cada um?"</p>
-          </div>
-          <div class="sql-block rounded-xl p-4 mb-4 font-mono text-sm">
-            <p class="text-gray-400 text-xs mb-2">-- SQL gerado pela Wanda</p>
-            <p><span class="text-purple-400">SELECT</span> p.nome_produto,</p>
-            <p class="pl-4">SUM(v.quantidade) <span class="text-blue-400">AS</span> total_vendido,</p>
-            <p class="pl-4">SUM(v.quantidade * p.preco) <span class="text-blue-400">AS</span> receita_total</p>
-            <p><span class="text-purple-400">FROM</span> vendas v</p>
-            <p><span class="text-purple-400">JOIN</span> produtos p <span class="text-blue-400">ON</span> v.produto_id = p.id</p>
-            <p><span class="text-purple-400">WHERE</span> v.data >= DATE_SUB(NOW(), <span class="text-green-400">INTERVAL</span> 3 MONTH)</p>
-            <p><span class="text-purple-400">GROUP BY</span> p.nome_produto</p>
-            <p><span class="text-purple-400">ORDER BY</span> receita_total <span class="text-blue-400">DESC</span></p>
-            <p><span class="text-purple-400">LIMIT</span> <span class="text-orange-400">5</span>;</p>
-          </div>
-          <div class="overflow-x-auto rounded-xl border border-gray-100">
-            <table class="w-full text-sm">
-              <thead class="bg-wanda-500 text-white">
-                <tr>
-                  <th class="px-4 py-2 text-left">Produto</th>
-                  <th class="px-4 py-2 text-right">Vendas</th>
-                  <th class="px-4 py-2 text-right">Receita</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-100">
-                <tr class="hover:bg-gray-50"><td class="px-4 py-2">Notebook Pro X</td><td class="px-4 py-2 text-right">1.247</td><td class="px-4 py-2 text-right text-green-600 font-medium">R$ 2.493.000</td></tr>
-                <tr class="hover:bg-gray-50 bg-wanda-50/30"><td class="px-4 py-2">Monitor 4K Ultra</td><td class="px-4 py-2 text-right">892</td><td class="px-4 py-2 text-right text-green-600 font-medium">R$ 1.338.000</td></tr>
-                <tr class="hover:bg-gray-50"><td class="px-4 py-2">Teclado Mecânico</td><td class="px-4 py-2 text-right">2.103</td><td class="px-4 py-2 text-right text-green-600 font-medium">R$ 840.000</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+    <!-- Right: Hero Image -->
+    <div class="flex justify-center lg:justify-end">
+      <div class="float-anim">
+        <img src="{{ url_for('static', filename='img/wanda_hero.png') }}"
+             alt="Wanda — Inteligência de Dados em Português"
+             class="w-full max-w-xl hero-glow rounded-3xl">
       </div>
     </div>
   </div>
+
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-gray-600 text-sm">
+    <span>Saiba mais</span>
+    <svg class="w-5 h-5 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+  </div>
 </section>
 
-<!-- LOGOS / SOCIAL PROOF -->
-<section class="py-12 bg-white border-y border-gray-100">
-  <div class="max-w-7xl mx-auto px-6 text-center">
-    <p class="text-sm text-gray-400 font-medium mb-6 uppercase tracking-wider">Compatível com os principais bancos de dados</p>
-    <div class="flex flex-wrap justify-center gap-8 items-center">
-      {% for db in [('PostgreSQL', '#336791'), ('MySQL', '#4479A1'), ('SQL Server', '#CC2927'), ('SQLite', '#003B57')] %}
+<!-- BANCOS SUPORTADOS -->
+<section class="bg-dark-section py-12 border-y border-white/5">
+  <div class="max-w-5xl mx-auto px-6 text-center">
+    <p class="text-gray-600 text-xs font-semibold mb-8 uppercase tracking-widest">Compatível com os principais bancos de dados</p>
+    <div class="flex flex-wrap justify-center items-center gap-10 md:gap-16">
+      {% for name, color in [('PostgreSQL','#60a5fa'), ('MySQL','#fb923c'), ('Neon DB','#34d399'), ('SQL Server','#f87171'), ('SQLite','#facc15'), ('Supabase','#a78bfa')] %}
       <div class="flex items-center gap-2 text-gray-500 font-semibold text-sm">
-        <div class="w-2 h-2 rounded-full" style="background: {{ db[1] }}"></div>
-        {{ db[0] }}
+        <div class="w-2.5 h-2.5 rounded-full" style="background:{{ color }}"></div>
+        {{ name }}
       </div>
       {% endfor %}
     </div>
   </div>
 </section>
 
-<!-- FEATURES -->
-<section id="features" class="py-24 px-6 bg-white">
-  <div class="max-w-7xl mx-auto">
+<!-- COMO FUNCIONA -->
+<section id="como-funciona" class="bg-dark-section py-24">
+  <div class="max-w-7xl mx-auto px-6">
     <div class="text-center mb-16">
-      <h2 class="text-4xl font-bold text-gray-900 mb-4">Tudo que você precisa para <span class="gradient-text">explorar seus dados</span></h2>
-      <p class="text-lg text-gray-500 max-w-2xl mx-auto">Da pergunta ao insight em segundos. Sem SQL. Sem complexidade.</p>
+      <span class="text-purple-400 text-sm font-semibold uppercase tracking-widest">Simples assim</span>
+      <h2 class="text-4xl font-black text-white mt-3">Como o Wanda funciona</h2>
+      <p class="text-gray-500 mt-4 text-lg max-w-2xl mx-auto">Em três passos, você transforma perguntas em insights sem escrever uma linha de código.</p>
     </div>
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {% set features = [
-        ('🔮', 'NL para SQL com IA', 'Claude AI converte suas perguntas em português para SQL preciso e otimizado automaticamente.', 'wanda'),
-        ('📊', 'Dashboards Interativos', 'Visualize resultados em gráficos de linha, barras, pizza e dispersão com um clique.', 'blue'),
-        ('🔗', 'Multi-banco de Dados', 'Conecte PostgreSQL, MySQL, SQL Server e SQLite. Gerencie múltiplas conexões.', 'green'),
-        ('💾', 'Salve suas Consultas', 'Organize e reutilize consultas frequentes. Histórico completo de todas as perguntas.', 'orange'),
-        ('📤', 'Exportação Fácil', 'Exporte resultados para CSV (Excel) ou gere relatórios em PDF com um clique.', 'pink'),
-        ('🧠', 'Aprendizado Contínuo', 'Sistema de feedback positivo/negativo melhora a precisão das respostas ao longo do tempo.', 'purple'),
-      ] %}
-      {% for icon, title, desc, color in features %}
-      <div class="card-hover bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-        <div class="text-4xl mb-4">{{ icon }}</div>
-        <h3 class="text-lg font-bold text-gray-900 mb-2">{{ title }}</h3>
-        <p class="text-gray-500 text-sm leading-relaxed">{{ desc }}</p>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
 
-<!-- HOW IT WORKS -->
-<section id="how-it-works" class="py-24 px-6" style="background: linear-gradient(180deg, #f8f7ff 0%, #ffffff 100%);">
-  <div class="max-w-7xl mx-auto">
-    <div class="text-center mb-16">
-      <h2 class="text-4xl font-bold text-gray-900 mb-4">Como funciona em <span class="gradient-text">3 passos</span></h2>
-    </div>
     <div class="grid md:grid-cols-3 gap-8">
-      {% for step, title, desc in [
-        ('1', 'Conecte seu banco', 'Informe as credenciais do seu banco de dados. A Wanda extrai o schema automaticamente e aprende a estrutura dos seus dados.'),
-        ('2', 'Faça sua pergunta', 'Digite sua pergunta em português, como faria com um analista humano. Sem SQL, sem jargões técnicos.'),
-        ('3', 'Obtenha resultados', 'Veja o SQL gerado, os dados em tabela, gráficos interativos e exporte para CSV ou PDF.'),
+      {% for num, icon_path, title, desc in [
+        ('1', 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4', 'Conecte seu banco', 'Insira as credenciais do seu banco de dados. Suportamos PostgreSQL, MySQL, SQL Server, Neon, Supabase e mais. Conexão criptografada com SSL obrigatório.'),
+        ('2', 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z', 'Pergunte em português', 'Digite sua pergunta como falaria com um analista: "Quais os 10 clientes com maior faturamento este mês?" O Claude AI entende e gera o SQL.'),
+        ('3', 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', 'Visualize e exporte', 'Receba tabelas, gráficos e insights instantâneos. Exporte para CSV ou PDF com um clique. Salve consultas frequentes para reutilizar.'),
       ] %}
-      <div class="text-center">
-        <div class="w-16 h-16 gradient-wanda rounded-2xl flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6 shadow-lg">{{ step }}</div>
-        <h3 class="text-xl font-bold text-gray-900 mb-3">{{ title }}</h3>
+      <div class="card-hover gradient-card border border-purple-800/25 rounded-3xl p-8">
+        <div class="w-12 h-12 bg-purple-600/15 border border-purple-600/30 rounded-2xl flex items-center justify-center text-purple-400 font-black text-xl mb-6">{{ num }}</div>
+        <div class="w-14 h-14 bg-gradient-to-br from-purple-600 to-purple-900 rounded-2xl flex items-center justify-center mb-6">
+          <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ icon_path }}"/></svg>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-3">{{ title }}</h3>
         <p class="text-gray-500 leading-relaxed">{{ desc }}</p>
       </div>
       {% endfor %}
     </div>
+
+    <!-- Demo terminal -->
+    <div class="mt-16 bg-gray-900/80 border border-purple-900/40 rounded-3xl p-8 max-w-4xl mx-auto">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+        <div class="w-3 h-3 rounded-full bg-green-500"></div>
+        <span class="text-gray-600 text-sm ml-2">Wanda — Nova Consulta</span>
+      </div>
+      <div class="space-y-5">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 bg-purple-700 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white">U</div>
+          <div class="bg-purple-950/60 border border-purple-800/30 rounded-2xl px-4 py-3 text-gray-200 text-sm">
+            Quais os 5 produtos mais vendidos no último trimestre?
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-800 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white">W</div>
+          <div class="space-y-3 flex-1">
+            <div class="bg-gray-800/80 border border-gray-700/50 rounded-2xl px-4 py-3">
+              <div class="text-xs text-purple-400 font-semibold mb-2">⚡ SQL Gerado · 94% confiança</div>
+              <code class="text-green-400 text-xs font-mono leading-relaxed">SELECT produto, SUM(quantidade) AS total_vendas<br>FROM pedidos WHERE data >= DATE_SUB(NOW(), INTERVAL 3 MONTH)<br>GROUP BY produto ORDER BY total_vendas DESC LIMIT 5</code>
+            </div>
+            <div class="text-gray-400 text-sm">Encontrei os 5 produtos mais vendidos. <strong class="text-white">Notebook Pro X</strong> lidera com 1.247 unidades no período.</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- PRICING -->
-<section id="pricing" class="py-24 px-6 bg-white">
-  <div class="max-w-7xl mx-auto">
+<div class="section-divider max-w-5xl mx-auto"></div>
+
+<!-- SEGURANÇA -->
+<section id="seguranca" class="bg-dark-section py-24">
+  <div class="max-w-7xl mx-auto px-6">
     <div class="text-center mb-16">
-      <h2 class="text-4xl font-bold text-gray-900 mb-4">Planos para cada <span class="gradient-text">necessidade</span></h2>
-      <p class="text-lg text-gray-500">Comece grátis. Escale conforme cresce.</p>
+      <span class="text-emerald-400 text-sm font-semibold uppercase tracking-widest">Proteção de nível empresarial</span>
+      <h2 class="text-4xl font-black text-white mt-3">Seus dados estão seguros</h2>
+      <p class="text-gray-500 mt-4 text-lg max-w-2xl mx-auto">A segurança é a base do Wanda. Cada camada da plataforma foi projetada para proteger seus dados corporativos.</p>
     </div>
-    <div class="grid md:grid-cols-4 gap-6">
-      {% set plans = [
-        ('Gratuito', 'R$ 0', '/mês', ['50 consultas/mês', '1 conexão de banco', 'Exportação CSV', 'Suporte por e-mail'], False, 'free'),
-        ('Starter', 'R$ 97', '/mês', ['500 consultas/mês', '3 conexões de banco', 'Exportação CSV e PDF', 'Dashboards básicos', 'Suporte prioritário'], False, 'starter'),
-        ('Pro', 'R$ 297', '/mês', ['Consultas ilimitadas', '10 conexões de banco', 'Todos os gráficos', 'API de acesso', 'Histórico completo', 'Suporte dedicado'], True, 'pro'),
-        ('Enterprise', 'Sob consulta', '', ['Tudo do Pro', 'Conexões ilimitadas', 'SSO / LDAP', 'Deploy on-premise', 'SLA garantido', 'Gerente de conta'], False, 'enterprise'),
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-14">
+      {% for icon_path, title, desc in [
+        ('M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z', 'Credenciais Criptografadas', 'As senhas do seu banco são armazenadas com criptografia AES-256. Nunca armazenamos dados das suas tabelas — apenas metadados de schema.'),
+        ('M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', 'SSL/TLS Obrigatório', 'Todas as conexões com bancos de dados usam SSL/TLS obrigatório. Compatível com Neon, Supabase, AWS RDS e outros provedores cloud seguros.'),
+        ('M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636', 'Apenas SELECT', 'O Wanda executa exclusivamente consultas de leitura. Comandos DROP, DELETE, UPDATE e INSERT são bloqueados automaticamente em todas as consultas.'),
+        ('M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', 'Isolamento por Usuário', 'Cada usuário acessa apenas seus próprios bancos e consultas. Não há compartilhamento de dados entre contas. Isolamento completo de sessões.'),
+        ('M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', 'Auditoria Completa', 'Histórico completo de todas as consultas realizadas, com timestamp, usuário e SQL gerado. Rastreabilidade total para conformidade e auditoria.'),
+        ('M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', 'Deploy On-Premise', 'No plano Enterprise, instale o Wanda dentro da sua infraestrutura. Seus dados nunca saem da sua rede corporativa. Controle total e compliance.'),
       ] %}
-      {% for name, price, period, features, popular, plan_id in plans %}
-      <div class="card-hover rounded-2xl border-2 p-6 relative
-        {% if popular %}border-wanda-500 shadow-xl shadow-wanda-500/20{% else %}border-gray-100{% endif %}">
-        {% if popular %}
-        <div class="absolute -top-3 left-1/2 -translate-x-1/2 gradient-wanda text-white text-xs font-bold px-4 py-1 rounded-full">MAIS POPULAR</div>
-        {% endif %}
-        <h3 class="text-lg font-bold text-gray-900 mb-1">{{ name }}</h3>
-        <div class="flex items-baseline gap-1 mb-4">
-          <span class="text-3xl font-extrabold {% if popular %}gradient-text{% else %}text-gray-900{% endif %}">{{ price }}</span>
-          <span class="text-gray-400 text-sm">{{ period }}</span>
+      <div class="security-badge rounded-3xl p-6 card-hover">
+        <div class="w-12 h-12 bg-emerald-500/15 rounded-2xl flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ icon_path }}"/></svg>
         </div>
-        <ul class="space-y-2 mb-6">
-          {% for f in features %}
-          <li class="flex items-center gap-2 text-sm text-gray-600">
-            <span class="text-green-500 font-bold">✓</span> {{ f }}
-          </li>
-          {% endfor %}
-        </ul>
-        <a href="/register?plan={{ plan_id }}"
-           class="block text-center py-3 rounded-xl font-semibold text-sm transition-all
-           {% if popular %}gradient-wanda text-white hover:opacity-90{% else %}border-2 border-gray-200 text-gray-700 hover:border-wanda-300 hover:text-wanda-600{% endif %}">
-          {% if plan_id == 'free' %}Começar Grátis{% elif plan_id == 'enterprise' %}Falar com Vendas{% else %}Assinar Agora{% endif %}
-        </a>
+        <h3 class="text-white font-bold text-lg mb-2">{{ title }}</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">{{ desc }}</p>
       </div>
       {% endfor %}
     </div>
+
+    <!-- Declaração de segurança -->
+    <div class="bg-gradient-to-r from-emerald-950/40 to-green-950/20 border border-emerald-800/25 rounded-3xl p-10 text-center max-w-3xl mx-auto">
+      <div class="flex justify-center mb-5">
+        <svg class="w-14 h-14 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+      </div>
+      <h3 class="text-xl font-bold text-white mb-3">O Wanda nunca armazena seus dados de negócio</h3>
+      <p class="text-gray-400 leading-relaxed">Ao fazer uma consulta, o Wanda conecta ao seu banco, executa o SELECT e retorna os resultados diretamente para você. Nenhum dado de negócio é persistido em nossos servidores. Apenas o histórico de consultas (SQL gerado) é salvo para sua conveniência e auditoria.</p>
+    </div>
   </div>
 </section>
 
+<div class="section-divider max-w-5xl mx-auto"></div>
+
+<!-- PLANOS -->
+<section id="planos" class="bg-dark-section py-24">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-16">
+      <span class="text-purple-400 text-sm font-semibold uppercase tracking-widest">Preços transparentes</span>
+      <h2 class="text-4xl font-black text-white mt-3">Escolha seu plano</h2>
+      <p class="text-gray-500 mt-4 text-lg">Comece grátis. Escale conforme sua necessidade.</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Gratuito -->
+      <div class="card-hover bg-dark-card rounded-3xl p-7 flex flex-col">
+        <div class="mb-6">
+          <div class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-3">Gratuito</div>
+          <div class="text-4xl font-black text-white">R$0</div>
+          <div class="text-gray-600 text-sm mt-1">Para sempre</div>
+        </div>
+        <ul class="space-y-3 flex-1 mb-8">
+          {% for item in ['50 consultas/mês', '1 conexão de banco', 'Exportação CSV', 'Histórico 7 dias'] %}
+          <li class="flex items-center gap-2 text-gray-400 text-sm">
+            <svg class="w-4 h-4 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            {{ item }}
+          </li>
+          {% endfor %}
+          {% for item in ['Exportação PDF', 'Suporte prioritário'] %}
+          <li class="flex items-center gap-2 text-gray-700 text-sm">
+            <svg class="w-4 h-4 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            {{ item }}
+          </li>
+          {% endfor %}
+        </ul>
+        <a href="{{ url_for('auth.register') }}" class="block text-center border border-gray-700 text-gray-400 font-semibold py-3 rounded-2xl hover:border-purple-600 hover:text-purple-300 transition-all text-sm">
+          Começar Grátis
+        </a>
+      </div>
+
+      <!-- Pro -->
+      <div class="card-hover plan-popular rounded-3xl p-7 flex flex-col relative">
+        <div class="absolute -top-4 left-1/2 -translate-x-1/2 badge-new text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-wide whitespace-nowrap">
+          Mais Popular
+        </div>
+        <div class="mb-6">
+          <div class="text-purple-300 text-xs font-bold uppercase tracking-widest mb-3">Profissional</div>
+          <div class="text-4xl font-black text-white">R$97</div>
+          <div class="text-purple-300/60 text-sm mt-1">por mês</div>
+        </div>
+        <ul class="space-y-3 flex-1 mb-8">
+          {% for item in ['1.000 consultas/mês', '5 conexões de banco', 'Exportação CSV e PDF', 'Histórico ilimitado', 'Consultas salvas', 'Suporte por email'] %}
+          <li class="flex items-center gap-2 text-gray-200 text-sm">
+            <svg class="w-4 h-4 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            {{ item }}
+          </li>
+          {% endfor %}
+        </ul>
+        <a href="{{ url_for('auth.register') }}" class="block text-center bg-white text-purple-900 font-bold py-3 rounded-2xl hover:bg-purple-50 transition-all text-sm">
+          Assinar Pro
+        </a>
+      </div>
+
+      <!-- Business -->
+      <div class="card-hover bg-dark-card rounded-3xl p-7 flex flex-col">
+        <div class="mb-6">
+          <div class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-3">Business</div>
+          <div class="text-4xl font-black text-white">R$297</div>
+          <div class="text-gray-600 text-sm mt-1">por mês</div>
+        </div>
+        <ul class="space-y-3 flex-1 mb-8">
+          {% for item in ['Consultas ilimitadas', '20 conexões de banco', 'Múltiplos usuários (5)', 'Dashboards automáticos', 'API de integração', 'Suporte prioritário'] %}
+          <li class="flex items-center gap-2 text-gray-400 text-sm">
+            <svg class="w-4 h-4 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            {{ item }}
+          </li>
+          {% endfor %}
+        </ul>
+        <a href="{{ url_for('auth.register') }}" class="block text-center bg-purple-700 text-white font-semibold py-3 rounded-2xl hover:bg-purple-600 transition-all text-sm">
+          Assinar Business
+        </a>
+      </div>
+
+      <!-- Enterprise -->
+      <div id="enterprise" class="card-hover plan-enterprise rounded-3xl p-7 flex flex-col relative">
+        <div class="absolute -top-4 left-1/2 -translate-x-1/2 badge-enterprise text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-wide whitespace-nowrap border border-purple-500/50">
+          On-Premise Disponível
+        </div>
+        <div class="mb-6">
+          <div class="text-purple-300 text-xs font-bold uppercase tracking-widest mb-3">Enterprise</div>
+          <div class="text-2xl font-black text-white leading-tight">Sob consulta</div>
+          <div class="text-purple-400/60 text-sm mt-1">Contrato anual</div>
+        </div>
+        <ul class="space-y-3 flex-1 mb-5">
+          {% for item in ['Tudo do Business', 'Usuários ilimitados', 'SLA garantido (99,9%)', 'Suporte 24/7 dedicado', 'Treinamento da equipe'] %}
+          <li class="flex items-center gap-2 text-gray-300 text-sm">
+            <svg class="w-4 h-4 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            {{ item }}
+          </li>
+          {% endfor %}
+          <li class="flex items-center gap-2 text-purple-300 text-sm font-semibold">
+            <svg class="w-4 h-4 text-purple-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+            Instalação On-Premise
+          </li>
+        </ul>
+        <div class="bg-purple-950/50 border border-purple-700/30 rounded-2xl p-4 mb-5">
+          <p class="text-purple-200 text-xs leading-relaxed">
+            <strong>🏢 On-Premise:</strong> Instale o Wanda dentro da sua infraestrutura corporativa. Seus dados nunca saem da sua rede. Ideal para empresas com requisitos rigorosos de compliance (LGPD, HIPAA, SOC 2).
+          </p>
+        </div>
+        <a href="mailto:contato@wanda.com.br" class="block text-center bg-gradient-to-r from-purple-600 to-purple-500 text-white font-bold py-3 rounded-2xl hover:from-purple-500 hover:to-purple-400 transition-all glow-btn text-sm">
+          Falar com Especialista
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider max-w-5xl mx-auto"></div>
+
 <!-- CTA FINAL -->
-<section class="py-24 px-6 gradient-wanda">
-  <div class="max-w-4xl mx-auto text-center">
-    <h2 class="text-4xl font-bold text-white mb-4">Pronto para transformar seus dados?</h2>
-    <p class="text-wanda-100 text-lg mb-8">Junte-se a centenas de empresas que já usam a Wanda para tomar decisões mais rápidas e inteligentes.</p>
-    <a href="/register" class="bg-white text-wanda-600 font-bold px-10 py-4 rounded-2xl text-lg hover:bg-wanda-50 transition-colors shadow-xl">
-      Começar Gratuitamente →
-    </a>
+<section class="bg-dark-section py-24">
+  <div class="max-w-4xl mx-auto px-6 text-center">
+    <div class="gradient-card border border-purple-800/25 rounded-3xl p-16 glow-purple">
+      <h2 class="text-4xl lg:text-5xl font-black text-white mb-6">
+        Pronto para transformar<br>
+        <span class="gradient-text-purple">dados em decisões?</span>
+      </h2>
+      <p class="text-gray-500 text-lg mb-10 max-w-2xl mx-auto">
+        Comece gratuitamente hoje. Conecte seu banco em minutos e faça sua primeira consulta em português.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="{{ url_for('auth.register') }}" class="glow-btn bg-gradient-to-r from-purple-600 to-purple-500 text-white font-bold px-10 py-4 rounded-2xl text-lg">
+          Começar Grátis Agora
+        </a>
+        <a href="mailto:contato@wanda.com.br" class="border border-purple-600/40 text-purple-300 font-semibold px-10 py-4 rounded-2xl text-lg hover:bg-purple-900/30 transition-all">
+          Falar com Vendas
+        </a>
+      </div>
+      <p class="text-gray-700 text-sm mt-6">Sem cartão de crédito · Cancele quando quiser</p>
+    </div>
   </div>
 </section>
 
 <!-- FOOTER -->
-<footer class="bg-gray-900 text-gray-400 py-12 px-6">
-  <div class="max-w-7xl mx-auto">
-    <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-      <div class="flex items-center gap-2">
-        <div class="w-8 h-8 gradient-wanda rounded-lg flex items-center justify-center">
-          <span class="text-white font-bold">W</span>
+<footer class="bg-dark-section border-t border-white/5 py-12">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="grid md:grid-cols-4 gap-8 mb-10">
+      <div>
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-800 rounded-xl flex items-center justify-center font-black text-white">W</div>
+          <span class="text-lg font-bold text-white">Wanda</span>
         </div>
-        <span class="text-white font-bold text-lg">Wanda</span>
+        <p class="text-gray-600 text-sm leading-relaxed">Inteligência de dados em português. Conecte, pergunte e decida.</p>
       </div>
-      <p class="text-sm">© 2024 Wanda. Todos os direitos reservados.</p>
-      <div class="flex gap-6 text-sm">
-        <a href="#" class="hover:text-white transition-colors">Privacidade</a>
-        <a href="#" class="hover:text-white transition-colors">Termos</a>
-        <a href="mailto:contato@wanda.app" class="hover:text-white transition-colors">Contato</a>
+      <div>
+        <h4 class="text-white font-semibold mb-4 text-xs uppercase tracking-widest">Produto</h4>
+        <ul class="space-y-2 text-gray-600 text-sm">
+          <li><a href="#como-funciona" class="hover:text-purple-300 transition-colors">Como Funciona</a></li>
+          <li><a href="#planos" class="hover:text-purple-300 transition-colors">Planos</a></li>
+          <li><a href="#seguranca" class="hover:text-purple-300 transition-colors">Segurança</a></li>
+          <li><a href="#enterprise" class="hover:text-purple-300 transition-colors">Enterprise</a></li>
+        </ul>
       </div>
+      <div>
+        <h4 class="text-white font-semibold mb-4 text-xs uppercase tracking-widest">Empresa</h4>
+        <ul class="space-y-2 text-gray-600 text-sm">
+          <li><a href="#" class="hover:text-purple-300 transition-colors">Sobre</a></li>
+          <li><a href="mailto:contato@wanda.com.br" class="hover:text-purple-300 transition-colors">Contato</a></li>
+          <li><a href="#" class="hover:text-purple-300 transition-colors">Blog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-white font-semibold mb-4 text-xs uppercase tracking-widest">Legal</h4>
+        <ul class="space-y-2 text-gray-600 text-sm">
+          <li><a href="#" class="hover:text-purple-300 transition-colors">Privacidade</a></li>
+          <li><a href="#" class="hover:text-purple-300 transition-colors">Termos de Uso</a></li>
+          <li><a href="#" class="hover:text-purple-300 transition-colors">LGPD</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      <p class="text-gray-700 text-sm">© 2026 Wanda. Todos os direitos reservados.</p>
+      <p class="text-gray-700 text-sm">Powered by <span class="text-purple-500">Claude AI · Anthropic</span></p>
     </div>
   </div>
 </footer>
+
+<script>
+  // Smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const t = document.querySelector(a.getAttribute('href'));
+      if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // Fade-in on scroll
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.08 });
+
+  document.querySelectorAll('.card-hover, .security-badge').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(18px)';
+    el.style.transition = 'opacity 0.55s ease, transform 0.55s ease';
+    obs.observe(el);
+  });
+</script>
 {% endblock %}
